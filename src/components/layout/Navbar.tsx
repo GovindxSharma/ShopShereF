@@ -1,13 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Menu, X, Search, ChevronDown } from "lucide-react";
+import {
+  ShoppingCart,
+  Menu,
+  X,
+  Search,
+  ChevronDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { logoutUser } from "@/redux/slices/authSlice"; // ✅ use logoutUser instead of logout
+import { logoutUser } from "@/redux/slices/authSlice";
 import { toast } from "sonner";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { selectCartCount } from "@/redux/slices/cartSlice";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -19,7 +26,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const [, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -36,7 +43,7 @@ export default function Navbar() {
       toast.success("Logged out successfully");
       navigate("/");
     } catch (error) {
-      const err = error as Error; // 👈 explicitly cast error
+      const err = error as Error;
       toast.error(err.message || "Logout failed");
     }
   };
@@ -75,9 +82,10 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 bg-background shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <Link to="/" className="text-xl font-bold">
-            🛒 ShopSphere
+          🛍️ShopSphere
           </Link>
 
+          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
@@ -93,6 +101,7 @@ export default function Navbar() {
             ))}
           </nav>
 
+          {/* Right Buttons */}
           <div className="flex items-center gap-2 md:gap-4 relative">
             <Button
               variant="ghost"
@@ -113,51 +122,30 @@ export default function Navbar() {
               </Button>
             </Link>
 
+            {/* Desktop Dropdown */}
             {user ? (
               <div
                 ref={dropdownRef}
                 className="hidden md:flex items-center gap-2 relative"
               >
-               <button
-  onClick={() => setDropdownOpen(!dropdownOpen)}
-  className="flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-white dark:text-black hover:bg-primary/90 transition"
->
-  {user.name}
-  <ChevronDown className="w-4 h-4" />
-</button>
-
-
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-white dark:text-black hover:bg-primary/90 transition"
+                >
+                  {user.name}
+                  <ChevronDown className="w-4 h-4" />
+                </button>
 
                 {dropdownOpen && (
                   <div className="absolute right-0 top-12 w-48 bg-white dark:bg-muted border rounded shadow-md py-2 z-50">
-                    <Link
-                      to="/profile"
-                      onClick={() => setDropdownOpen(false)}
-                      className="block px-4 py-2 text-sm hover:bg-muted"
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/orders"
-                      onClick={() => setDropdownOpen(false)}
-                      className="block px-4 py-2 text-sm hover:bg-muted"
-                    >
-                      Orders
-                    </Link>
+                    <Link to="/profile" onClick={() => setDropdownOpen(false)} className="block px-4 py-2 text-sm hover:bg-muted">Profile</Link>
+                    <Link to="/orders" onClick={() => setDropdownOpen(false)} className="block px-4 py-2 text-sm hover:bg-muted">Orders</Link>
 
                     {user.role === "admin" && (
                       <>
                         <hr className="my-1 border-gray-200 dark:border-gray-700" />
-                        <p className="px-4 py-1 text-xs text-muted-foreground">
-                          Admin Panel
-                        </p>
-                        <Link
-                          to="/admin/dashboard"
-                          onClick={() => setDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm hover:bg-muted"
-                        >
-                          Dashboard
-                        </Link>
+                        <p className="px-4 py-1 text-xs text-muted-foreground">Admin Panel</p>
+                        <Link to="/admin/dashboard" onClick={() => setDropdownOpen(false)} className="block px-4 py-2 text-sm hover:bg-muted">Dashboard</Link>
                       </>
                     )}
 
@@ -177,14 +165,13 @@ export default function Navbar() {
             ) : (
               <div className="hidden md:flex items-center gap-4">
                 <Link to="/login">
-                  <Button variant="secondary" className="text-sm">
-                    Login
-                  </Button>
+                  <Button variant="secondary" className="text-sm">Login</Button>
                 </Link>
                 <ModeToggle />
               </div>
             )}
 
+            {/* Hamburger Icon */}
             <button className="md:hidden p-2" onClick={() => setMenuOpen(true)}>
               <Menu className="w-5 h-5" />
             </button>
@@ -192,7 +179,83 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Search Modal below navbar */}
+      {/* Mobile Menu */}
+      <AnimatePresence>
+  {menuOpen && (
+    <>
+      {/* Backdrop */}
+      <motion.div
+        className="fixed inset-0 bg-black/20 z-40"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setMenuOpen(false)}
+      />
+
+      {/* Slide-in Menu */}
+      <motion.div
+        className="fixed top-0 right-0 h-full w-64 bg-background z-50 shadow-lg p-6 flex flex-col justify-between"
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "tween", duration: 0.3 }}
+      >
+        <div>
+          <div className="flex justify-end mb-4">
+            <button onClick={() => setMenuOpen(false)}>
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <nav className="flex flex-col gap-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className="text-lg font-medium hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+            <Link to="/cart" onClick={() => setMenuOpen(false)}>Cart</Link>
+
+            {user ? (
+              <>
+                <Link to="/profile" onClick={() => setMenuOpen(false)}>Profile</Link>
+                <Link to="/orders" onClick={() => setMenuOpen(false)}>Orders</Link>
+                {user.role === "admin" && (
+                  <Link to="/admin/dashboard" onClick={() => setMenuOpen(false)}>Admin Dashboard</Link>
+                )}
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="text-left text-red-500"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link to="/login" onClick={() => setMenuOpen(false)}>
+                <Button variant="secondary" className="w-full">Login</Button>
+              </Link>
+            )}
+          </nav>
+        </div>
+
+        {/* ModeToggle always visible here too */}
+        <div className="pt-6">
+          <ModeToggle />
+        </div>
+      </motion.div>
+    </>
+  )}
+</AnimatePresence>
+
+
+      {/* Search Modal */}
       {searchOpen && (
         <div className="fixed inset-0 z-50 bg-black/10 flex justify-center pt-24 px-4">
           <div
@@ -229,6 +292,10 @@ export default function Navbar() {
     </>
   );
 }
+
+// ------------------------------
+// LiveProductResults component
+// ------------------------------
 import type { Product } from "@/types/product";
 
 function LiveProductResults({
@@ -239,7 +306,6 @@ function LiveProductResults({
   onSelect: () => void;
 }) {
   const [results, setResults] = useState<Product[]>([]);
-
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
