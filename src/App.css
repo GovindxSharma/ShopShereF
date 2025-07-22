@@ -1,0 +1,18 @@
+
+@layer base {
+  html, body, #root {
+    @apply h-full overflow-x-hidden;
+  }
+}
+
+/* Prevent scrollbars from showing up due to layout glitches */
+body, html, #root {
+  overflow-x: hidden;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
