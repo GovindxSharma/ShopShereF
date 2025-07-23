@@ -297,6 +297,7 @@ export default function Navbar() {
 // LiveProductResults component
 // ------------------------------
 import type { Product } from "@/types/product";
+import Fuse from "fuse.js";
 
 function LiveProductResults({
   query,
@@ -305,47 +306,52 @@ function LiveProductResults({
   query: string;
   onSelect: () => void;
 }) {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!query.trim()) {
+    // Fetch all products only once
+    const fetchAllProducts = async () => {
+      try {
+        setLoading(true);
+        const API_BASE = import.meta.env.VITE_API_BASE_URL;
+        const res = await fetch(`${API_BASE}/products/all`);
+        const data = await res.json();
+        setAllProducts(data.products || []);
+      } catch (err) {
+        console.error("Failed to fetch all products", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllProducts();
+  }, []);
+
+  useEffect(() => {
+    if (!query.trim() || allProducts.length === 0) {
       setResults([]);
       return;
     }
 
-    const controller = new AbortController();
+    const fuse = new Fuse(allProducts, {
+      keys: ["name", "category"],
+      threshold: 0.4, // smaller = stricter, higher = fuzzier
+    });
 
-    const API_BASE = import.meta.env.VITE_API_BASE_URL;
-    const timeout = setTimeout(async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`${API_BASE}/products?search=${query}`, {
-          signal: controller.signal,
-        });
-        const data = await res.json();
-        setResults(data.products || []);
-      } catch (err) {
-        console.error("Search error", err);
-      } finally {
-        setLoading(false);
-      }
-    }, 300);
-
-    return () => {
-      clearTimeout(timeout);
-      controller.abort();
-    };
-  }, [query]);
+    const matches = fuse.search(query).map((match) => match.item);
+    setResults(matches);
+  }, [query, allProducts]);
 
   if (!query.trim()) return null;
 
   return (
     <div className="max-h-80 overflow-y-auto space-y-2 scrollbar-hidden">
-      {loading && <p className="text-sm text-muted-foreground">Searching...</p>}
+      {loading && <p className="text-sm text-muted-foreground">Loading products...</p>}
       {!loading && results.length === 0 && (
-        <p className="text-sm text-muted-foreground">No products found.</p>
+        <p className="text-sm text-muted-foreground">No matching products.</p>
       )}
       {results.map((product) => (
         <div
