@@ -1,15 +1,15 @@
-import { useState } from "react"
-import { SlidersHorizontal, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useRef, useState } from "react";
+import { SlidersHorizontal, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
-  selectedCategory: string
-  onCategoryChange: (val: string) => void
-  selectedRating: number
-  onRatingChange: (val: number) => void
-  selectedPrice: number
-  onPriceChange: (val: number) => void
-  onClear: () => void
+  selectedCategory: string;
+  onCategoryChange: (val: string) => void;
+  selectedRating: number;
+  onRatingChange: (val: number) => void;
+  selectedPrice: number;
+  onPriceChange: (val: number) => void;
+  onClear: () => void;
 }
 
 export default function FiltersSidebar({
@@ -21,21 +21,43 @@ export default function FiltersSidebar({
   onPriceChange,
   onClear,
 }: Props) {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [manualPrice, setManualPrice] = useState(selectedPrice)
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [manualPrice, setManualPrice] = useState(selectedPrice);
+  const mobileRef = useRef<HTMLDivElement>(null);
 
-  const categories = ["All", "Pants","T-Shirts", "Shoes", "Accessories", "Bags"]
-  const ratings = [5, 4, 3, 2, 1]
+  const categories = ["All", "Pants", "T-Shirts", "Shoes", "Accessories", "Bags"];
+  const ratings = [5, 4, 3, 2, 1];
 
   const applyManualPrice = () => {
-    onPriceChange(manualPrice)
-  }
+    onPriceChange(manualPrice);
+  };
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileRef.current &&
+        !mobileRef.current.contains(event.target as Node)
+      ) {
+        applyManualPrice();
+        setMobileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mobileOpen, manualPrice]);
 
   return (
     <>
       {/* Mobile Filter Button */}
       <div className="md:hidden mb-4">
-        <Button variant="outline" onClick={() => setMobileOpen(true)} className="flex gap-2 items-center">
+        <Button
+          variant="outline"
+          onClick={() => setMobileOpen(true)}
+          className="flex gap-2 items-center"
+        >
           <SlidersHorizontal className="w-4 h-4" />
           Filters
         </Button>
@@ -62,10 +84,18 @@ export default function FiltersSidebar({
       {/* Filters for Mobile */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 flex justify-end">
-          <div className="w-80 bg-background p-4 space-y-6 overflow-y-auto h-full shadow-lg">
+          <div
+            ref={mobileRef}
+            className="w-80 bg-background p-4 space-y-6 overflow-y-auto h-full shadow-lg"
+          >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Filters</h2>
-              <button onClick={() => setMobileOpen(false)}>
+              <button
+                onClick={() => {
+                  applyManualPrice();
+                  setMobileOpen(false);
+                }}
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -87,7 +117,7 @@ export default function FiltersSidebar({
         </div>
       )}
     </>
-  )
+  );
 }
 
 // ✅ Helper Component: FiltersContent
@@ -105,18 +135,18 @@ function FiltersContent({
   applyManualPrice,
   onClear,
 }: {
-  categories: string[]
-  selectedCategory: string
-  onCategoryChange: (val: string) => void
-  ratings: number[]
-  selectedRating: number
-  onRatingChange: (val: number) => void
-  selectedPrice: number
-  onPriceChange: (val: number) => void
-  manualPrice: number
-  setManualPrice: (val: number) => void
-  applyManualPrice: () => void
-  onClear: () => void
+  categories: string[];
+  selectedCategory: string;
+  onCategoryChange: (val: string) => void;
+  ratings: number[];
+  selectedRating: number;
+  onRatingChange: (val: number) => void;
+  selectedPrice: number;
+  onPriceChange: (val: number) => void;
+  manualPrice: number;
+  setManualPrice: (val: number) => void;
+  applyManualPrice: () => void;
+  onClear: () => void;
 }) {
   return (
     <>
@@ -168,8 +198,8 @@ function FiltersContent({
           step={100}
           value={selectedPrice}
           onChange={(e) => {
-            onPriceChange(Number(e.target.value))
-            setManualPrice(Number(e.target.value))
+            onPriceChange(Number(e.target.value));
+            setManualPrice(Number(e.target.value));
           }}
           className="w-full"
         />
@@ -191,9 +221,14 @@ function FiltersContent({
       </div>
 
       {/* Clear All Button */}
-      <Button variant="outline" size="sm" className="w-full mt-2" onClick={onClear}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full mt-2"
+        onClick={onClear}
+      >
         Clear All Filters
       </Button>
     </>
-  )
+  );
 }

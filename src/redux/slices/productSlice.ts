@@ -27,6 +27,7 @@ export const fetchProducts = createAsyncThunk(
       category?: string
       ratings?: number
       price?: number
+      keyword?: string // 
     },
     thunkAPI
   ) => {
@@ -37,6 +38,7 @@ export const fetchProducts = createAsyncThunk(
       if (params.category && params.category !== "All") query.append("category", params.category)
       if (params.ratings) query.append("ratings", params.ratings.toString())
       if (params.price) query.append("price", params.price.toString())
+      if (params.keyword) query.append("search", params.keyword) // ✅ added
 
         const res = await fetch(`${API_BASE_URL}/products?${query.toString()}`, {
           credentials: "include", // ✅ include cookies

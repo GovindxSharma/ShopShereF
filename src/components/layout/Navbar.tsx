@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  ShoppingCart,
-  Menu,
-  X,
-  Search,
-  ChevronDown,
-} from "lucide-react";
+import { ShoppingCart, Menu, X, Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
@@ -82,7 +76,7 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 bg-background shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <Link to="/" className="text-xl font-bold">
-          🛍️ShopSphere
+            🛍️ShopSphere
           </Link>
 
           {/* Desktop Nav */}
@@ -138,14 +132,34 @@ export default function Navbar() {
 
                 {dropdownOpen && (
                   <div className="absolute right-0 top-12 w-48 bg-white dark:bg-muted border rounded shadow-md py-2 z-50">
-                    <Link to="/profile" onClick={() => setDropdownOpen(false)} className="block px-4 py-2 text-sm hover:bg-muted">Profile</Link>
-                    <Link to="/orders" onClick={() => setDropdownOpen(false)} className="block px-4 py-2 text-sm hover:bg-muted">Orders</Link>
+                    <Link
+                      to="/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      className="block px-4 py-2 text-sm hover:bg-muted"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      to="/orders"
+                      onClick={() => setDropdownOpen(false)}
+                      className="block px-4 py-2 text-sm hover:bg-muted"
+                    >
+                      Orders
+                    </Link>
 
                     {user.role === "admin" && (
                       <>
                         <hr className="my-1 border-gray-200 dark:border-gray-700" />
-                        <p className="px-4 py-1 text-xs text-muted-foreground">Admin Panel</p>
-                        <Link to="/admin/dashboard" onClick={() => setDropdownOpen(false)} className="block px-4 py-2 text-sm hover:bg-muted">Dashboard</Link>
+                        <p className="px-4 py-1 text-xs text-muted-foreground">
+                          Admin Panel
+                        </p>
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm hover:bg-muted"
+                        >
+                          Dashboard
+                        </Link>
                       </>
                     )}
 
@@ -165,7 +179,9 @@ export default function Navbar() {
             ) : (
               <div className="hidden md:flex items-center gap-4">
                 <Link to="/login">
-                  <Button variant="secondary" className="text-sm">Login</Button>
+                  <Button variant="secondary" className="text-sm">
+                    Login
+                  </Button>
                 </Link>
                 <ModeToggle />
               </div>
@@ -181,79 +197,91 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       <AnimatePresence>
-  {menuOpen && (
-    <>
-      {/* Backdrop */}
-      <motion.div
-        className="fixed inset-0 bg-black/20 z-40"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => setMenuOpen(false)}
-      />
+        {menuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 bg-black/20 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMenuOpen(false)}
+            />
 
-      {/* Slide-in Menu */}
-      <motion.div
-        className="fixed top-0 right-0 h-full w-64 bg-background z-50 shadow-lg p-6 flex flex-col justify-between"
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "tween", duration: 0.3 }}
-      >
-        <div>
-          <div className="flex justify-end mb-4">
-            <button onClick={() => setMenuOpen(false)}>
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+            {/* Slide-in Menu */}
+            <motion.div
+              className="fixed top-0 right-0 h-full w-64 bg-background z-50 shadow-lg p-6 flex flex-col justify-between"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+            >
+              <div>
+                <div className="flex justify-end mb-4">
+                  <button onClick={() => setMenuOpen(false)}>
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
 
-          <nav className="flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className="text-lg font-medium hover:text-primary"
-                onClick={() => setMenuOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <Link to="/cart" onClick={() => setMenuOpen(false)}>Cart</Link>
+                <nav className="flex flex-col gap-4">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      to={link.path}
+                      className="text-lg font-medium hover:text-primary"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                  <Link to="/cart" onClick={() => setMenuOpen(false)}>
+                    Cart
+                  </Link>
 
-            {user ? (
-              <>
-                <Link to="/profile" onClick={() => setMenuOpen(false)}>Profile</Link>
-                <Link to="/orders" onClick={() => setMenuOpen(false)}>Orders</Link>
-                {user.role === "admin" && (
-                  <Link to="/admin/dashboard" onClick={() => setMenuOpen(false)}>Admin Dashboard</Link>
-                )}
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="text-left text-red-500"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link to="/login" onClick={() => setMenuOpen(false)}>
-                <Button variant="secondary" className="w-full">Login</Button>
-              </Link>
-            )}
-          </nav>
-        </div>
+                  {user ? (
+                    <>
+                      <Link to="/profile" onClick={() => setMenuOpen(false)}>
+                        Profile
+                      </Link>
+                      <Link to="/orders" onClick={() => setMenuOpen(false)}>
+                        Orders
+                      </Link>
+                      {user.role === "admin" && (
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="text-left text-red-500"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <Link to="/login" onClick={() => setMenuOpen(false)}>
+                      <Button variant="secondary" className="w-full">
+                        Login
+                      </Button>
+                    </Link>
+                  )}
+                </nav>
+              </div>
 
-        {/* ModeToggle always visible here too */}
-        <div className="pt-6">
-          <ModeToggle />
-        </div>
-      </motion.div>
-    </>
-  )}
-</AnimatePresence>
-
+              {/* ModeToggle always visible here too */}
+              <div className="pt-6">
+                <ModeToggle />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Search Modal */}
       {searchOpen && (
@@ -267,10 +295,20 @@ export default function Navbar() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && query.trim()) {
+                    navigate(
+                      `/products?search=${encodeURIComponent(query.trim())}`
+                    );
+                    setSearchOpen(false);
+                    setQuery("");
+                  }
+                }}
                 placeholder="Search for products..."
                 className="w-full px-4 py-3 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 autoFocus
               />
+
               <button
                 onClick={() => {
                   setSearchOpen(false);
@@ -349,7 +387,9 @@ function LiveProductResults({
 
   return (
     <div className="max-h-80 overflow-y-auto space-y-2 scrollbar-hidden">
-      {loading && <p className="text-sm text-muted-foreground">Loading products...</p>}
+      {loading && (
+        <p className="text-sm text-muted-foreground">Loading products...</p>
+      )}
       {!loading && results.length === 0 && (
         <p className="text-sm text-muted-foreground">No matching products.</p>
       )}
