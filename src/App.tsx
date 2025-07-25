@@ -32,6 +32,7 @@ import AdminRoute from "@/components/routes/AdminRoute"
 
 import "./App.css"
 import AdminOrderDetailsPage from "./pages/admin/AdminOrderDetailsPage"
+import ChatBot from "./components/chatbot/Chatbo"
 
 
 function App() {
@@ -99,6 +100,8 @@ function App() {
 
           </Route>
         </Routes>
+
+        <ChatBot />
       </main>
     </div>
   )
