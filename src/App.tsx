@@ -2,14 +2,15 @@
 import { Routes, Route } from "react-router-dom"
 import { useEffect } from "react"
 import { useAppDispatch } from "@/redux/hooks"
+import { useSelector } from "react-redux"
 import { setUser, clearUser } from "@/redux/slices/authSlice"
-import { fetchCart } from "@/redux/slices/cartSlice" // ✅ import cart fetch
+import { fetchCart } from "@/redux/slices/cartSlice"
+import type { RootState } from "@/redux/store"
 
 import Navbar from "@/components/layout/Navbar"
 import Home from "@/pages/Home"
 import ProductsPage from "@/pages/products/Products"
 import ProductDetail from "@/pages/products/ProductDetail"
-
 import CartPage from "@/pages/CartPage"
 import Login from "@/pages/auth/Login"
 import Register from "@/pages/auth/RegisterPage"
@@ -24,32 +25,39 @@ import AdminDashboard from "@/pages/admin/AdminDashboard"
 import AdminOrders from "@/pages/admin/AdminOrders"
 import AdminProducts from "@/pages/admin/AdminProducts"
 import AdminUsers from "@/pages/admin/AdminUsers"
-
+import AdminOrderDetailsPage from "./pages/admin/AdminOrderDetailsPage"
 
 import ProtectedRoute from "@/components/routes/ProtectedRoute"
 import UnauthenticatedRoute from "@/components/routes/UnauthenticatedRoute"
 import AdminRoute from "@/components/routes/AdminRoute"
 
-import "./App.css"
-import AdminOrderDetailsPage from "./pages/admin/AdminOrderDetailsPage"
 import ChatBot from "./components/chatbot/Chatbo"
-
+import "./App.css"
 
 function App() {
   const dispatch = useAppDispatch()
+  const { loading } = useSelector((state: RootState) => state.auth)
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL
+
   // ✅ Fetch user on app load
   useEffect(() => {
     const fetchUser = async () => {
+      console.log("[Auth] Checking user...")
       try {
         const res = await fetch(`${API_BASE}/auth/me`, {
           credentials: "include",
         })
         const data = await res.json()
-        if (res.ok) dispatch(setUser(data.user))
-        else dispatch(clearUser())
-      } catch {
+        if (res.ok) {
+          console.log("[Auth] User fetched:", data.user)
+          dispatch(setUser(data.user))
+        } else {
+          console.log("[Auth] No user found")
+          dispatch(clearUser())
+        }
+      } catch (err) {
+        console.log("[Auth] Error fetching user", err)
         dispatch(clearUser())
       }
     }
@@ -61,6 +69,15 @@ function App() {
   useEffect(() => {
     dispatch(fetchCart())
   }, [dispatch])
+
+  // ⏳ Wait until auth is resolved
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-xl">
+        Loading...
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -79,7 +96,6 @@ function App() {
             <Route path="/orders" element={<UserOrders />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
-
           </Route>
 
           {/* 🚫 Not logged in */}
@@ -97,7 +113,6 @@ function App() {
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/orders/:id" element={<AdminOrderDetailsPage />} />
-
           </Route>
         </Routes>
 

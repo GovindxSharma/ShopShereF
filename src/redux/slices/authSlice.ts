@@ -17,7 +17,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  loading: false,
+  loading: true,
   error: null,
 }
 
@@ -59,12 +59,17 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUser(state, action: PayloadAction<User>) {
+      console.log("[Redux] setUser triggered")
       state.user = action.payload
+      state.loading = false
     },
     clearUser(state) {
+      console.log("[Redux] clearUser triggered")
       state.user = null
+      state.loading = false
     },
-  },
+  }
+  ,
   extraReducers: (builder) => {
     builder
       .addCase(login.pending, (state) => {

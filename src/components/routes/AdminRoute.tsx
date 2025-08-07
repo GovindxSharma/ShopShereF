@@ -3,18 +3,12 @@ import { Navigate, Outlet } from "react-router-dom"
 import type { RootState } from "@/redux/store"
 
 export default function AdminRoute() {
-  const user = useSelector((state: RootState) => state.auth.user)
+  const { user, loading } = useSelector((state: RootState) => state.auth)
 
-  if (!user) {
-    // Not logged in → redirect to login
-    return <Navigate to="/login" replace />
-  }
+  if (loading) return null // or a spinner
 
-  if (user.role !== "admin") {
-    // Logged in but not admin → redirect to homepage or show 403
-    return <Navigate to="/" replace />
-  }
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role !== "admin") return <Navigate to="/" replace />
 
-  // Authenticated and is admin → allow access
   return <Outlet />
 }
