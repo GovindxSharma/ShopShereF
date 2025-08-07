@@ -3,6 +3,7 @@ import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { fetchUserOrders } from "@/redux/slices/orderSlice";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import Loader from "@/components/common/Loader"
 
 export default function UserOrdersPage() {
   const dispatch = useAppDispatch();
@@ -12,7 +13,7 @@ export default function UserOrdersPage() {
     dispatch(fetchUserOrders());
   }, [dispatch]);
 
-  if (loading) return <p className="text-center text-sm text-muted-foreground">Loading your orders...</p>;
+  if (loading) return <p className="text-center text-sm text-muted-foreground"><Loader/></p>;
 
   if (error) {
     toast.error(error);

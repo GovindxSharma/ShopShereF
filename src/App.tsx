@@ -31,8 +31,9 @@ import ProtectedRoute from "@/components/routes/ProtectedRoute"
 import UnauthenticatedRoute from "@/components/routes/UnauthenticatedRoute"
 import AdminRoute from "@/components/routes/AdminRoute"
 
-import ChatBot from "./components/chatbot/Chatbo"
+import ChatBot from "./components/chatbot/Chatbot"
 import "./App.css"
+import Loader from "@/components/common/Loader"
 
 function App() {
   const dispatch = useAppDispatch()
@@ -74,7 +75,7 @@ function App() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-xl">
-        Loading...
+        <Loader/>
       </div>
     )
   }

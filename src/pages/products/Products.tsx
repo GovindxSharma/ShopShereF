@@ -70,7 +70,7 @@ export default function ProductsPage() {
 
         <main className="flex-1">
           {loading ? (
-             <div className="flex justify-center items-center h-64">
+             <div className="flex justify-center items-center h-screen text-xl">
              <Loader />
            </div>
           ) : error ? (
