@@ -52,13 +52,14 @@ export default function ChatBot() {
 
   return (
     <>
-      {/* Floating Button with Icon */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 bg-black text-white w-14 h-14 rounded-full shadow-md hover:scale-105 transition-all flex items-center justify-center"
-      >
-        <FaComments size={20} />
-      </button>
+    {/* Floating Button with Icon */}
+<button
+  onClick={() => setOpen(!open)}
+  className="fixed bottom-6 right-6 z-50 bg-black dark:bg-white text-white dark:text-black w-14 h-14 rounded-full shadow-md hover:scale-105 transition-all flex items-center justify-center"
+>
+  <FaComments className="text-white dark:text-black" size={20} />
+</button>
+
 
       {/* Chat Window */}
       {open && (
@@ -115,7 +116,7 @@ export default function ChatBot() {
                 className="absolute right-1 top-1/2 -translate-y-1/2 bg-black text-white p-2 rounded-full hover:bg-gray-900 hover:scale-110 transition-all"
                 aria-label="Send"
               >
-                <FaPaperPlane size={14} />
+                <FaPaperPlane   size={14} />
               </button>
             </div>
           </div>
