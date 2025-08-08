@@ -63,7 +63,7 @@ export default function Home() {
 
           <div className="mt-8 sm:mt-10">
             <Link to="/products">
-              <Button variant="outline">See All Products</Button>
+              <Button  size="lg">See All Products</Button>
             </Link>
           </div>
         </div>
