@@ -27,8 +27,9 @@ export const fetchProducts = createAsyncThunk(
       category?: string
       ratings?: number
       price?: number
-      keyword?: string // 
-    },
+      keyword?: string
+      sort?: string
+    } = {},
     thunkAPI
   ) => {
     try {
@@ -36,21 +37,22 @@ export const fetchProducts = createAsyncThunk(
       if (params.page) query.append("page", params.page.toString())
       if (params.limit) query.append("limit", params.limit.toString())
       if (params.category && params.category !== "All") query.append("category", params.category)
-      if (params.ratings) query.append("ratings", params.ratings.toString())
-      if (params.price) query.append("price", params.price.toString())
-      if (params.keyword) query.append("search", params.keyword) // ✅ added
+      if (params.ratings && params.ratings > 0) query.append("ratings", params.ratings.toString())
+      if (params.price && params.price > 0) query.append("price", params.price.toString())
+      if (params.keyword && params.keyword.trim() !== "") query.append("search", params.keyword.trim())
+      if (params.sort) query.append("sort", params.sort)
 
-        const res = await fetch(`${API_BASE_URL}/products?${query.toString()}`, {
-          credentials: "include", // ✅ include cookies
-        })
-      
+      const res = await fetch(`${API_BASE_URL}/products?${query.toString()}`, {
+        credentials: "include",
+      })
+
       const data = await res.json()
-      return { products: data.products, total: data.total }
+      if (!res.ok) throw new Error(data.message || "Failed to fetch products")
+      return { products: data.products || [], total: data.total || 0 }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch Products"
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch products"
       return thunkAPI.rejectWithValue(errorMessage)
     }
-    
   }
 )
 

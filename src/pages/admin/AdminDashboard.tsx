@@ -7,6 +7,8 @@ import {
   PackageSearch,
   UserRound,
   IndianRupee,
+  TicketPercent,
+  Truck,
 } from "lucide-react"
 
 import {
@@ -122,14 +124,24 @@ const AdminDashboard = () => {
       icon: <UserRound className="w-6 h-6 text-primary" />,
       path: "/admin/users",
     },
+    {
+      label: "Promo Coupons",
+      icon: <TicketPercent className="w-6 h-6 text-primary" />,
+      path: "/admin/coupons",
+    },
+    {
+      label: "Delivery Logistics",
+      icon: <Truck className="w-6 h-6 text-primary" />,
+      path: "/delivery/dashboard",
+    },
   ]
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 space-y-12">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold">📊 Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground text-sm">
-          Track performance and manage the store
+          Track performance and manage store operations
         </p>
       </div>
 
@@ -168,7 +180,7 @@ const AdminDashboard = () => {
 
       {/* Quick Actions */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">🛠️ Quick Management</h2>
+        <h2 className="text-xl font-semibold">Store Management</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {managementLinks.map((item) => (
             <Card

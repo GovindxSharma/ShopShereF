@@ -1,91 +1,69 @@
+# 🛍️ ShopSphere — Modern E-Commerce Frontend
 
-## 🛍️ Shopshere Frontend
-
-Welcome to the frontend for **Shopshere** — a modern e-commerce shopping platform built with React, Redux, and Tailwind CSS. It offers users a seamless shopping experience and admins full control over products, orders, and users.
-
-### 🌐 Live Website
-
-* **Frontend**: [https://shopsheretheshoppingzone.onrender.com]
-* **Backend**: [https://shopshereb.onrender.com]
+A modern, high-performance, and feature-packed e-commerce web application built with **React 19, TypeScript, Redux Toolkit, Tailwind CSS v4, and Framer Motion**.
 
 ---
 
-## ⚙️ Tech Stack
+## ✨ Features & User Experience
 
-* **React** (w/ Vite)
-* **Redux Toolkit**
-* **Tailwind CSS**
-* **React Router**
-* **Razorpay Integration**
-* **Google OAuth Login**
-* **Cloudinary (for image uploads)**
-
----
-
-## 📁 Project Structure
-
-```bash
-src/
-│
-├── components/         # Reusable UI components
-├── pages/              # Page-level components (Home, ProductDetail, Cart, etc.)
-├── redux/              # Redux slices and store
-├── types/              # TypeScript interfaces and types
-├── assets/             # Static images and assets
-└── App.tsx             # Main app and routes
-```
+- 💎 **Modern UI/UX Design**: Clean glassmorphism, responsive navigation drawer, dark/light theme toggle, and smooth micro-interactions.
+- 🔍 **Live Fuzzy Search (Fuse.js)**: Instant keyboard-driven global search modal with fuzzy matching across product names, categories, and descriptions.
+- 💖 **Persistent Wishlist**: Save favorite items with one-click "Move to Cart" and local storage synchronization.
+- 🎯 **Advanced Catalog & Filters**: Multi-category pills, dynamic price slider, minimum rating selector, and sorting (Price, Newest, Ratings).
+- 🏷️ **Promo Code Simulator**: Apply discount coupons (`SHOPSHERE10` for 10% off) with live price recalculation.
+- 💳 **Dual Checkout Experience**:
+  - **Instant Demo Checkout / COD**: Fast end-to-end checkout with atomic stock adjustment and order receipt generation.
+  - **Razorpay Integration**: Real-time payment modal with automated verification.
+- 📦 **Order Tracking & Invoice Viewer**: Visual 4-step delivery progress stepper (`Placed` -> `Paid` -> `In Transit` -> `Delivered`), order cancellation, and printable invoice receipts.
+- 🤖 **AI Shopping Assistant**: Floating AI chatbot with quick prompt suggestions for deals, return policies, and order tracking.
+- 🛠️ **Full Admin Suite**: Metrics dashboard (Total Revenue, Orders, Products, Users), live inventory management, and order status transitions.
 
 ---
 
-## 🚀 Getting Started Locally
+## 🛠️ Tech Stack
 
-### 1. Clone the repository
+- **Framework**: React 19 & Vite 7
+- **Language**: TypeScript 5.8
+- **State Management**: Redux Toolkit & React-Redux
+- **Styling**: Tailwind CSS v4, tw-animate-css, Radix UI Primitives
+- **Animations**: Framer Motion
+- **Icons**: Lucide React & React Icons
+- **Search**: Fuse.js (Fuzzy client-side search)
+- **Toasts**: Sonner
 
-```bash
-git clone https://github.com/yourusername/shopshere-frontend.git
-cd shopshere-frontend
-```
+---
 
-### 2. Install dependencies
+## 🧑‍💻 Quickstart Locally
 
+### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Create `.env` file
-
-Create a `.env` file in the root and add your backend URL:
-
+### 2. Configure Environment Variables
+Create `.env` in the root:
 ```env
-VITE_API_BASE_URL=https://shopshereb.onrender.com/api
+VITE_API_BASE_URL=http://localhost:5000/api
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
-### 4. Start the development server
-
+### 3. Start Development Server
 ```bash
 npm run dev
 ```
+Client runs at `http://localhost:5173`.
 
 ---
 
-## 🧪 Features
+## 🔑 Demo Credentials
 
-### 👥 User
-
-* Browse products, search, filter by category
-* View detailed product info
-* Add to cart and manage items
-* Checkout and pay with Razorpay
-* View order history
-* Update profile and password
-* Forgot/reset password
-
-### 🛠️ Admin
-
-* Add/edit/delete products
-* View all orders with analytics
-* Manage registered users
-* Dashboard overview with metrics
+| Role | Email | Password |
+|---|---|---|
+| **Admin** | `admin@shopshere.com` | `Admin@12345` |
+| **Customer** | `user@shopshere.com` | `User@12345` |
 
 ---
+
+## 🧩 License
+MIT License.

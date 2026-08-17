@@ -30,7 +30,7 @@ export const createRazorpayOrder = createAsyncThunk(
   }
 )
 
-// 2️⃣ Create App Order after payment
+// 2️⃣ Create App Order (Razorpay)
 export const createAppOrder = createAsyncThunk(
   "order/createAppOrder",
   async (
@@ -38,11 +38,15 @@ export const createAppOrder = createAsyncThunk(
       items,
       shippingAddress,
       totalAmount,
+      discountAmount = 0,
+      couponCode = "",
       razorpayOrderId,
     }: {
       items: OrderItem[]
       shippingAddress: ShippingAddress
       totalAmount: number
+      discountAmount?: number
+      couponCode?: string
       razorpayOrderId: string
     },
     thunkAPI
@@ -50,14 +54,61 @@ export const createAppOrder = createAsyncThunk(
     try {
       return await fetchWithJson("/orders", {
         method: "POST",
-        body: JSON.stringify({ items, shippingAddress, totalAmount, razorpayOrderId }),
+        body: JSON.stringify({
+          items,
+          shippingAddress,
+          totalAmount,
+          discountAmount,
+          couponCode,
+          razorpayOrderId,
+        }),
       })
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Order creation failed"
       return thunkAPI.rejectWithValue(errorMessage)
     }
-    
+  }
+)
+
+// ⚡ Create Demo / COD Order (Instant Test Checkout)
+export const createDemoOrder = createAsyncThunk(
+  "order/createDemoOrder",
+  async (
+    {
+      items,
+      shippingAddress,
+      totalAmount,
+      discountAmount = 0,
+      couponCode = "",
+      paymentMethod = "demo",
+    }: {
+      items: OrderItem[]
+      shippingAddress: ShippingAddress
+      totalAmount: number
+      discountAmount?: number
+      couponCode?: string
+      paymentMethod?: "demo" | "cod"
+    },
+    thunkAPI
+  ) => {
+    try {
+      return await fetchWithJson("/orders/demo", {
+        method: "POST",
+        body: JSON.stringify({
+          items,
+          shippingAddress,
+          totalAmount,
+          discountAmount,
+          couponCode,
+          paymentMethod,
+        }),
+      })
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Demo order failed"
+      return thunkAPI.rejectWithValue(errorMessage)
+    }
   }
 )
 
@@ -85,10 +136,9 @@ export const verifyPayment = createAsyncThunk(
       })
     } catch (err: unknown) {
       const errorMessage =
-        err instanceof Error ? err.message : "Pyment verification failed"
+        err instanceof Error ? err.message : "Payment verification failed"
       return thunkAPI.rejectWithValue(errorMessage)
     }
-    
   }
 )
 
@@ -100,10 +150,26 @@ export const fetchUserOrders = createAsyncThunk<Order[], void, { rejectValue: st
       return await fetchWithJson("/orders/mine")
     } catch (err: unknown) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to Fetch Orders"
+        err instanceof Error ? err.message : "Failed to fetch orders"
       return thunkAPI.rejectWithValue(errorMessage)
     }
-    
+  }
+)
+
+// 5️⃣ Cancel Order (User)
+export const cancelUserOrder = createAsyncThunk<Order, string, { rejectValue: string }>(
+  "order/cancelUserOrder",
+  async (orderId: string, thunkAPI) => {
+    try {
+      const res = await fetchWithJson(`/orders/${orderId}/cancel`, {
+        method: "PUT",
+      })
+      return res.order
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to cancel order"
+      return thunkAPI.rejectWithValue(errorMessage)
+    }
   }
 )
 
@@ -128,8 +194,7 @@ const orderSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-
-      // Create Order
+      // Create App Order
       .addCase(createAppOrder.pending, (state) => {
         state.loading = true
         state.error = null
@@ -139,6 +204,20 @@ const orderSlice = createSlice({
         state.currentOrder = action.payload
       })
       .addCase(createAppOrder.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
+      })
+
+      // Create Demo Order
+      .addCase(createDemoOrder.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(createDemoOrder.fulfilled, (state, action: PayloadAction<Order>) => {
+        state.loading = false
+        state.currentOrder = action.payload
+      })
+      .addCase(createDemoOrder.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })
@@ -157,6 +236,13 @@ const orderSlice = createSlice({
         state.error = action.payload as string
       })
 
+      // Cancel Order
+      .addCase(cancelUserOrder.fulfilled, (state, action: PayloadAction<Order>) => {
+        state.userOrders = state.userOrders.map((o) =>
+          o._id === action.payload._id ? action.payload : o
+        )
+      })
+
       // Verify Payment
       .addCase(verifyPayment.pending, (state) => {
         state.loading = true
@@ -164,10 +250,13 @@ const orderSlice = createSlice({
       })
       .addCase(verifyPayment.fulfilled, (state, action) => {
         state.loading = false
-        state.currentOrder = {
-          ...state.currentOrder!,
-          ...action.payload,
-          paymentStatus: "paid",
+        if (state.currentOrder) {
+          state.currentOrder = {
+            ...state.currentOrder,
+            ...action.payload,
+            paymentStatus: "paid",
+            orderStatus: "processing",
+          }
         }
       })
       .addCase(verifyPayment.rejected, (state, action) => {

@@ -1,5 +1,5 @@
 // src/App.tsx
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Link } from "react-router-dom"
 import { useEffect } from "react"
 import { useAppDispatch } from "@/redux/hooks"
 import { useSelector } from "react-redux"
@@ -19,17 +19,22 @@ import ResetPassword from "@/pages/auth/ResetPassword"
 import UpdatePassword from "@/pages/auth/UpdatePassword"
 import UserOrders from "@/pages/user/UserOrders"
 import ProfilePage from "@/pages/user/ProfilePage"
+import WishlistPage from "@/pages/user/WishlistPage"
 import CheckoutPage from "@/pages/CheckOut"
 
 import AdminDashboard from "@/pages/admin/AdminDashboard"
 import AdminOrders from "@/pages/admin/AdminOrders"
 import AdminProducts from "@/pages/admin/AdminProducts"
 import AdminUsers from "@/pages/admin/AdminUsers"
+import AdminCoupons from "@/pages/admin/AdminCoupons"
 import AdminOrderDetailsPage from "./pages/admin/AdminOrderDetailsPage"
+import DeliveryDashboard from "@/pages/delivery/DeliveryDashboard"
+import NotFoundPage from "@/pages/NotFoundPage"
 
 import ProtectedRoute from "@/components/routes/ProtectedRoute"
 import UnauthenticatedRoute from "@/components/routes/UnauthenticatedRoute"
 import AdminRoute from "@/components/routes/AdminRoute"
+import DeliveryRoute from "@/components/routes/DeliveryRoute"
 
 import ChatBot from "./components/chatbot/Chatbot"
 import "./App.css"
@@ -44,21 +49,17 @@ function App() {
   // ✅ Fetch user on app load
   useEffect(() => {
     const fetchUser = async () => {
-      console.log("[Auth] Checking user...")
       try {
         const res = await fetch(`${API_BASE}/auth/me`, {
           credentials: "include",
         })
         const data = await res.json()
-        if (res.ok) {
-          console.log("[Auth] User fetched:", data.user)
+        if (res.ok && data.user) {
           dispatch(setUser(data.user))
         } else {
-          console.log("[Auth] No user found")
           dispatch(clearUser())
         }
       } catch (err) {
-        console.log("[Auth] Error fetching user", err)
         dispatch(clearUser())
       }
     }
@@ -74,8 +75,8 @@ function App() {
   // ⏳ Wait until auth is resolved
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen text-xl">
-        <Loader/>
+      <div className="flex justify-center items-center h-screen text-xl bg-background">
+        <Loader />
       </div>
     )
   }
@@ -89,6 +90,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
 
           {/* 🔒 Authenticated */}
           <Route element={<ProtectedRoute />}>
@@ -113,12 +115,103 @@ function App() {
             <Route path="/admin/orders" element={<AdminOrders />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/coupons" element={<AdminCoupons />} />
             <Route path="/admin/orders/:id" element={<AdminOrderDetailsPage />} />
           </Route>
+
+          {/* 🚚 Logistics & Delivery Executive Portal */}
+          <Route element={<DeliveryRoute />}>
+            <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+          </Route>
+
+          {/* 🔍 404 Catch-All */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
 
         <ChatBot />
       </main>
+
+      {/* 🌟 Modern Footer */}
+      <footer className="bg-card border-t border-border/40 py-12 text-sm text-muted-foreground mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="space-y-3">
+            <Link to="/" className="text-xl font-bold text-foreground flex items-center gap-2.5">
+              <img
+                src="/logo.png"
+                alt="ShopSphere Logo"
+                className="w-7 h-7 object-contain rounded-lg"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none"
+                }}
+              />
+              <span className="font-extrabold tracking-tight">ShopSphere</span>
+            </Link>
+            <p className="text-xs leading-relaxed">
+              Curated fashion, apparel, and lifestyle essentials with fast nationwide delivery and secure checkout.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="font-bold text-foreground text-xs uppercase tracking-wider">
+              Quick Links
+            </h4>
+            <ul className="space-y-1.5 text-xs">
+              <li>
+                <Link to="/products" className="hover:text-primary transition">
+                  Browse Products
+                </Link>
+              </li>
+              <li>
+                <Link to="/wishlist" className="hover:text-primary transition">
+                  Wishlist
+                </Link>
+              </li>
+              <li>
+                <Link to="/cart" className="hover:text-primary transition">
+                  Shopping Cart
+                </Link>
+              </li>
+              <li>
+                <Link to="/orders" className="hover:text-primary transition">
+                  Order Tracking
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="font-bold text-foreground text-xs uppercase tracking-wider">
+              Customer Care
+            </h4>
+            <ul className="space-y-1.5 text-xs">
+              <li>
+                <span className="text-muted-foreground">Free Shipping on Orders &gt; ₹999</span>
+              </li>
+              <li>
+                <span className="text-muted-foreground">7-Day Return Policy</span>
+              </li>
+              <li>
+                <span className="text-muted-foreground">Promo Code: SHOPSHERE10 (10% OFF)</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="font-bold text-foreground text-xs uppercase tracking-wider">
+              Contact & Support
+            </h4>
+            <p className="text-xs">
+              Email: <span className="text-foreground">govindsharma2839@gmail.com</span>
+            </p>
+            <p className="text-xs">
+              Phone / WA: <span className="text-foreground">+91 9712935176</span>
+            </p>
+            <p className="text-xs text-muted-foreground pt-2">
+              © {new Date().getFullYear()} ShopSphere. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

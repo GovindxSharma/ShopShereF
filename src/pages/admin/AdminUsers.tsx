@@ -11,7 +11,7 @@ interface User {
   _id: string
   name: string
   email: string
-  role: "user" | "admin"
+  role: "user" | "delivery" | "admin"
 }
 
 const AdminUsers = () => {
