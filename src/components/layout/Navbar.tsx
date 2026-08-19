@@ -345,13 +345,13 @@ export default function Navbar() {
             />
 
             <motion.div
-              className="fixed top-0 right-0 h-full w-4/5 max-w-sm bg-background border-l z-50 shadow-2xl p-6 flex flex-col justify-between"
+              className="fixed top-0 right-0 h-full w-4/5 max-w-sm bg-background border-l z-50 shadow-2xl p-6 flex flex-col justify-between overflow-y-auto"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div className="flex justify-between items-center border-b pb-4">
                   <span className="font-extrabold text-lg flex items-center gap-2 text-foreground">
                     <img
@@ -359,32 +359,55 @@ export default function Navbar() {
                       alt="ShopSphere Logo"
                       className="w-6 h-6 object-contain rounded-md"
                     />{" "}
-                    ShopSphere
+                    {user?.role === "delivery" ? "Logistics Hub" : "ShopSphere"}
                   </span>
                   <button
                     onClick={() => setMenuOpen(false)}
-                    className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+                    className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <nav className="flex flex-col gap-2">
+                {/* User Info Header Card if logged in */}
+                {user && (
+                  <div className="p-3.5 rounded-2xl bg-muted/50 border border-border/50 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-black uppercase shrink-0">
+                      {user.name?.charAt(0) || "U"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-foreground truncate">{user.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      {user.role === "admin" && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mt-0.5">
+                          <Sparkles className="w-3 h-3" /> Admin Account
+                        </span>
+                      )}
+                      {user.role === "delivery" && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-primary mt-0.5">
+                          <Truck className="w-3 h-3" /> Delivery Partner
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <nav className="flex flex-col gap-1.5">
                   {user?.role === "delivery" ? (
                     <>
                       <Link
                         to="/delivery/dashboard"
                         onClick={() => setMenuOpen(false)}
-                        className="px-3 py-2 rounded-lg bg-primary/10 text-primary font-bold flex items-center gap-2"
+                        className="px-3 py-2.5 rounded-xl bg-primary/10 text-primary font-bold flex items-center gap-2.5 text-sm"
                       >
                         <Truck className="w-4 h-4" /> Active Delivery Run
                       </Link>
                       <Link
                         to="/profile"
                         onClick={() => setMenuOpen(false)}
-                        className="px-3 py-2 rounded-lg hover:bg-muted font-medium text-sm"
+                        className="px-3 py-2.5 rounded-xl hover:bg-muted font-medium text-sm flex items-center gap-2.5"
                       >
-                        Profile Settings
+                        <UserIcon className="w-4 h-4 text-muted-foreground" /> Profile Settings
                       </Link>
                     </>
                   ) : (
@@ -392,25 +415,27 @@ export default function Navbar() {
                       <Link
                         to="/"
                         onClick={() => setMenuOpen(false)}
-                        className="px-3 py-2 rounded-lg hover:bg-muted font-medium"
+                        className="px-3 py-2.5 rounded-xl hover:bg-muted font-medium text-sm flex items-center gap-2.5"
                       >
-                        Home
+                        <HomeIcon className="w-4 h-4 text-muted-foreground" /> Home
                       </Link>
                       <Link
                         to="/products"
                         onClick={() => setMenuOpen(false)}
-                        className="px-3 py-2 rounded-lg hover:bg-muted font-medium"
+                        className="px-3 py-2.5 rounded-xl hover:bg-muted font-medium text-sm flex items-center gap-2.5"
                       >
-                        Browse Products
+                        <ShoppingBag className="w-4 h-4 text-muted-foreground" /> Browse Products
                       </Link>
                       <Link
                         to="/wishlist"
                         onClick={() => setMenuOpen(false)}
-                        className="px-3 py-2 rounded-lg hover:bg-muted font-medium flex justify-between items-center"
+                        className="px-3 py-2.5 rounded-xl hover:bg-muted font-medium text-sm flex justify-between items-center"
                       >
-                        <span>Wishlist</span>
+                        <span className="flex items-center gap-2.5">
+                          <Heart className="w-4 h-4 text-muted-foreground" /> Wishlist
+                        </span>
                         {wishlistItems.length > 0 && (
-                          <span className="text-xs bg-red-500 text-white rounded-full px-2 py-0.5">
+                          <span className="text-xs bg-red-500 text-white rounded-full px-2 py-0.5 font-bold">
                             {wishlistItems.length}
                           </span>
                         )}
@@ -418,48 +443,65 @@ export default function Navbar() {
                       <Link
                         to="/cart"
                         onClick={() => setMenuOpen(false)}
-                        className="px-3 py-2 rounded-lg hover:bg-muted font-medium flex justify-between items-center"
+                        className="px-3 py-2.5 rounded-xl hover:bg-muted font-medium text-sm flex justify-between items-center"
                       >
-                        <span>Cart</span>
+                        <span className="flex items-center gap-2.5">
+                          <ShoppingCart className="w-4 h-4 text-muted-foreground" /> Cart
+                        </span>
                         {cartCount > 0 && (
-                          <span className="text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
+                          <span className="text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5 font-bold">
                             {cartCount}
                           </span>
                         )}
                       </Link>
 
                       {user && (
-                        <div className="pt-4 border-t my-2 space-y-1">
+                        <div className="pt-3 border-t my-1 space-y-1">
                           <p className="px-3 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
                             Account
                           </p>
                           <Link
                             to="/profile"
                             onClick={() => setMenuOpen(false)}
-                            className="px-3 py-2 rounded-lg hover:bg-muted block text-sm"
+                            className="px-3 py-2.5 rounded-xl hover:bg-muted font-medium text-sm flex items-center gap-2.5"
                           >
-                            Profile
+                            <UserIcon className="w-4 h-4 text-muted-foreground" /> Profile Settings
                           </Link>
                           <Link
                             to="/orders"
                             onClick={() => setMenuOpen(false)}
-                            className="px-3 py-2 rounded-lg hover:bg-muted block text-sm"
+                            className="px-3 py-2.5 rounded-xl hover:bg-muted font-medium text-sm flex items-center gap-2.5"
                           >
-                            Orders
+                            <Package className="w-4 h-4 text-muted-foreground" /> My Orders
                           </Link>
                           {user.role === "admin" && (
                             <Link
                               to="/admin/dashboard"
                               onClick={() => setMenuOpen(false)}
-                              className="px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium block text-sm flex items-center gap-2"
+                              className="px-3 py-2.5 rounded-xl bg-primary/10 text-primary font-medium text-sm flex items-center gap-2.5"
                             >
-                              <ShieldAlert className="w-4 h-4" />
-                              Admin Dashboard
+                              <ShieldAlert className="w-4 h-4" /> Admin Dashboard
                             </Link>
                           )}
                         </div>
                       )}
                     </>
+                  )}
+
+                  {/* Log Out Button for Mobile Users */}
+                  {user && (
+                    <div className="pt-3 border-t mt-2">
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false)
+                          handleLogout()
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-500/10 active:bg-red-500/20 transition border border-red-500/20 text-left"
+                      >
+                        <LogOut className="w-4 h-4 text-red-500" />
+                        <span>Log Out</span>
+                      </button>
+                    </div>
                   )}
 
                   {!user && (
@@ -472,7 +514,7 @@ export default function Navbar() {
                 </nav>
               </div>
 
-              <div className="pt-4 border-t flex justify-between items-center text-sm text-muted-foreground">
+              <div className="pt-4 border-t flex justify-between items-center text-sm text-muted-foreground mt-6">
                 <span>Theme</span>
                 <ModeToggle />
               </div>

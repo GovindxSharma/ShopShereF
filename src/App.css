@@ -1,14 +1,17 @@
-
 @layer base {
-  html, body, #root {
-    @apply h-full overflow-x-hidden;
+  html {
+    @apply min-h-full;
+  }
+  body, #root {
+    @apply min-h-full overflow-x-hidden;
   }
 }
 
-/* Prevent scrollbars from showing up due to layout glitches */
+/* Prevent horizontal scrollbars from showing up due to animations */
 body, html, #root {
   overflow-x: hidden;
 }
+
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }

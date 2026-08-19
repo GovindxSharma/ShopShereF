@@ -39,6 +39,7 @@ import DeliveryRoute from "@/components/routes/DeliveryRoute"
 import ChatBot from "./components/chatbot/Chatbot"
 import "./App.css"
 import Loader from "@/components/common/Loader"
+import ScrollToTop from "@/components/common/ScrollToTop"
 
 function App() {
   const dispatch = useAppDispatch()
@@ -83,6 +84,7 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
+      <ScrollToTop />
       <Navbar />
       <main className="flex-grow">
         <Routes>

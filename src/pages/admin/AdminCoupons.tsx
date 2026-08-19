@@ -10,6 +10,8 @@ import {
   Home,
   Calendar,
   Sparkles,
+  ArrowLeft,
+  RefreshCw,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -167,44 +169,74 @@ export default function AdminCouponsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-8 min-h-[75vh]">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8 min-h-[75vh]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight flex items-center gap-2">
-            <TicketPercent className="w-8 h-8 text-primary" />
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center border-b pb-5">
+        <div className="space-y-1.5">
+          {/* Breadcrumb & Navigation */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/admin/dashboard")}
+              className="rounded-xl text-xs text-muted-foreground hover:text-foreground -ml-2.5 h-7 px-2 flex items-center gap-1 font-semibold"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Dashboard</span>
+            </Button>
+            <span className="text-muted-foreground/30 text-xs">/</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
+              Marketing
+            </span>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
+            <TicketPercent className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
             Promo Coupons Manager
           </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Generate promotional discounts, set validity dates, and toggle active status
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 w-full sm:w-auto pt-1 sm:pt-0">
           <Button
             variant="outline"
-            onClick={() => navigate("/admin/dashboard")}
-            className="flex gap-2 items-center rounded-xl text-xs"
+            size="sm"
+            onClick={fetchCoupons}
+            disabled={loading}
+            className="rounded-xl text-xs flex items-center justify-center gap-1.5 h-9 px-3 shrink-0"
+            title="Refresh coupons list"
           >
-            <Home className="w-4 h-4" />
-            Dashboard
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/admin/dashboard")}
+            className="rounded-xl text-xs hidden sm:flex items-center gap-1.5 font-semibold h-9 px-3.5"
+          >
+            <Home className="w-3.5 h-3.5" /> Dashboard
           </Button>
 
           <Button
             onClick={() => setShowCreateModal(true)}
-            className="flex gap-2 items-center rounded-xl text-xs font-bold shadow-xs"
+            className="rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs flex-1 sm:flex-initial h-9 px-4"
           >
             <Plus className="w-4 h-4" />
-            Generate Coupon
+            <span>Generate Coupon</span>
           </Button>
         </div>
       </div>
 
       {/* Coupons Table / Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="border rounded-2xl p-5 space-y-3 bg-card">
+            <div key={i} className="border rounded-2xl p-4 sm:p-5 space-y-3 bg-card">
               <Skeleton className="h-5 w-1/3" />
               <Skeleton className="h-4 w-2/3" />
               <Skeleton className="h-8 w-full" />
@@ -212,7 +244,7 @@ export default function AdminCouponsPage() {
           ))}
         </div>
       ) : coupons.length === 0 ? (
-        <div className="text-center py-16 border rounded-3xl bg-card p-8 space-y-4">
+        <div className="text-center py-16 border rounded-3xl bg-card p-6 sm:p-8 space-y-4">
           <TicketPercent className="w-12 h-12 text-muted-foreground mx-auto stroke-1" />
           <h3 className="text-lg font-bold">No Coupons Generated Yet</h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
@@ -223,7 +255,7 @@ export default function AdminCouponsPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
           {coupons.map((coupon) => {
             const isExpired = new Date(coupon.expiryDate) < new Date()
 
@@ -321,8 +353,8 @@ export default function AdminCouponsPage() {
 
       {/* Generate Coupon Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-card border border-border/80 p-6 rounded-3xl w-full max-w-lg shadow-2xl space-y-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-card border border-border/80 p-4 sm:p-6 rounded-3xl w-full max-w-lg shadow-2xl space-y-4 sm:space-y-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="border-b pb-3">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" /> Generate New Promo Coupon

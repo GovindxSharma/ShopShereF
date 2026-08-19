@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useAppSelector } from "@/redux/hooks"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import {
@@ -12,6 +13,8 @@ import {
   Navigation,
   RefreshCw,
   Search,
+  Home,
+  ArrowLeft,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -57,6 +60,7 @@ interface Order {
 
 export default function DeliveryDashboardPage() {
   const { user } = useAppSelector((state) => state.auth)
+  const navigate = useNavigate()
 
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -155,46 +159,81 @@ export default function DeliveryDashboardPage() {
   const deliveredCount = orders.filter((o) => o.isDelivered || o.orderStatus === "delivered").length
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8 min-h-[80vh]">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8 min-h-[80vh]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-2">
-            <Truck className="w-3.5 h-3.5" /> Logistics & Delivery Hub
-          </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center border-b pb-5">
+        <div className="space-y-1.5">
+          {user?.role === "admin" ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/admin/dashboard")}
+                className="rounded-xl text-xs text-muted-foreground hover:text-foreground -ml-2.5 h-7 px-2 flex items-center gap-1 font-semibold"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Dashboard</span>
+              </Button>
+              <span className="text-muted-foreground/30 text-xs">/</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
+                Logistics
+              </span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+              <Truck className="w-3.5 h-3.5" /> Logistics & Delivery Hub
+            </div>
+          )}
+
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             {user?.name || "Delivery Partner"}
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Manage dispatches, update live transit milestones, and record customer doorstep handovers
           </p>
         </div>
 
-        <Button
-          onClick={fetchOrders}
-          variant="outline"
-          size="sm"
-          className="rounded-xl text-xs flex items-center gap-1.5"
-        >
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh Shipments
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 w-full sm:w-auto pt-1 sm:pt-0">
+          <Button
+            onClick={fetchOrders}
+            variant="outline"
+            size="sm"
+            className="rounded-xl text-xs flex items-center justify-center gap-1.5 h-9 px-3 shrink-0"
+            title="Refresh shipments"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Refresh Shipments</span>
+          </Button>
+
+          {user?.role === "admin" && (
+            <Button
+              onClick={() => navigate("/admin/dashboard")}
+              variant="outline"
+              size="sm"
+              className="rounded-xl text-xs hidden sm:flex items-center gap-1.5 font-semibold h-9 px-3.5"
+            >
+              <Home className="w-3.5 h-3.5" /> Back to Dashboard
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl border bg-card shadow-2xs space-y-1">
-          <span className="text-xs font-semibold text-muted-foreground">Active Shipments</span>
-          <p className="text-2xl font-black text-amber-600 dark:text-amber-400">{activeCount}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="p-3.5 sm:p-4 rounded-2xl border bg-card shadow-2xs space-y-1">
+          <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground">Active Shipments</span>
+          <p className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">{activeCount}</p>
         </div>
 
-        <div className="p-4 rounded-2xl border bg-card shadow-2xs space-y-1">
-          <span className="text-xs font-semibold text-muted-foreground">Successfully Delivered</span>
-          <p className="text-2xl font-black text-green-600">{deliveredCount}</p>
+        <div className="p-3.5 sm:p-4 rounded-2xl border bg-card shadow-2xs space-y-1">
+          <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground">Delivered</span>
+          <p className="text-xl sm:text-2xl font-black text-green-600">{deliveredCount}</p>
         </div>
 
-        <div className="p-4 rounded-2xl border bg-card shadow-2xs space-y-1 col-span-2 sm:col-span-1">
-          <span className="text-xs font-semibold text-muted-foreground">Total Managed Packages</span>
-          <p className="text-2xl font-black text-primary">{orders.length}</p>
+        <div className="p-3.5 sm:p-4 rounded-2xl border bg-card shadow-2xs space-y-1 col-span-2 sm:col-span-1">
+          <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground">Total Managed</span>
+          <p className="text-xl sm:text-2xl font-black text-primary">{orders.length}</p>
         </div>
       </div>
 
@@ -289,7 +328,7 @@ export default function DeliveryDashboardPage() {
             return (
               <div
                 key={order._id}
-                className="border rounded-3xl p-5 sm:p-6 bg-card shadow-2xs space-y-4 transition hover:border-primary/40"
+                className="border rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-card shadow-2xs space-y-4 transition hover:border-primary/40"
               >
                 {/* Top Row: AWB & Status */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3.5 text-xs">

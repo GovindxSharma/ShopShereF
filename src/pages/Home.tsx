@@ -426,24 +426,80 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 🌟 5 Interactive Luxury Slide Boxes (Flows naturally with zero overlap) */}
-        <div className="relative z-20 max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 w-full mt-6 sm:mt-10">
-          <div className="grid grid-cols-5 gap-1 sm:gap-3">
+        {/* 🌟 Responsive Carousel Controls (Mobile Segmented Bar + Desktop Luxury Cards) */}
+        <div className="relative z-20 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full mt-6 sm:mt-10">
+          {/* Mobile Controller (< sm) */}
+          <div className="block sm:hidden space-y-3">
+            {/* 5 Progress Bars */}
+            <div className="grid grid-cols-5 gap-2">
+              {heroSlides.map((slide, i) => {
+                const isActive = currentHeroIndex === i
+
+                return (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    onClick={() => setCurrentHeroIndex(i)}
+                    className="py-1.5 focus:outline-none cursor-pointer"
+                    aria-label={`Go to slide ${i + 1}: ${slide.shortTitle}`}
+                  >
+                    <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                      {isActive ? (
+                        <motion.div
+                          key={`bar-mobile-${currentHeroIndex}`}
+                          initial={{ width: "0%" }}
+                          animate={{ width: "100%" }}
+                          transition={{ duration: 5.5, ease: "linear" }}
+                          className="h-full bg-amber-400 rounded-full"
+                        />
+                      ) : (
+                        <div
+                          className={`h-full ${
+                            i < currentHeroIndex ? "bg-white/40" : "w-0"
+                          }`}
+                        />
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Active Slide Pill */}
+            <div className="flex items-center justify-between bg-black/60 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-2xl">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[11px] font-mono font-black text-amber-300 bg-white/10 px-2 py-0.5 rounded-lg border border-white/10 shrink-0">
+                  0{currentHeroIndex + 1} / 0{heroSlides.length}
+                </span>
+                <span className="text-xs font-bold text-white truncate">
+                  {currentSlide.shortTitle}
+                </span>
+              </div>
+
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-400 text-zinc-950 shadow-xs shrink-0">
+                {currentSlide.discountTag}
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Controller (sm and above) */}
+          <div className="hidden sm:grid sm:grid-cols-5 gap-3">
             {heroSlides.map((slide, i) => {
               const isActive = currentHeroIndex === i
 
               return (
                 <button
                   key={slide.id}
+                  type="button"
                   onClick={() => setCurrentHeroIndex(i)}
-                  className={`text-left p-1.5 sm:p-3 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all duration-300 relative border flex flex-col justify-between overflow-hidden group cursor-pointer ${
+                  className={`text-left p-3 rounded-2xl backdrop-blur-md transition-all duration-300 relative border flex flex-col justify-between overflow-hidden group cursor-pointer ${
                     isActive
-                      ? "bg-black/85 border-amber-400/90 ring-1 sm:ring-2 ring-amber-400/40 shadow-2xl scale-[1.01]"
+                      ? "bg-black/85 border-amber-400/90 ring-2 ring-amber-400/40 shadow-2xl scale-[1.01]"
                       : "bg-black/55 hover:bg-black/75 border-white/20 hover:border-white/40 shadow-md"
                   }`}
                 >
                   {/* Progress Fill Line */}
-                  <div className="h-1 sm:h-1.5 w-full bg-white/20 rounded-full overflow-hidden mb-1 sm:mb-2">
+                  <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden mb-2">
                     {isActive ? (
                       <motion.div
                         key={`bar-${currentHeroIndex}`}
@@ -460,7 +516,7 @@ export default function Home() {
                   {/* Header Row: Index Number & Discount Tag */}
                   <div className="flex items-center justify-between w-full">
                     <span
-                      className={`text-[8px] sm:text-[11px] font-mono font-black ${
+                      className={`text-[11px] font-mono font-black ${
                         isActive ? "text-amber-300" : "text-white/60"
                       }`}
                     >
@@ -468,7 +524,7 @@ export default function Home() {
                     </span>
 
                     <span
-                      className={`text-[7px] sm:text-[10px] font-black uppercase px-1 sm:px-1.5 py-0.5 rounded ${
+                      className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded ${
                         isActive
                           ? "bg-amber-400 text-zinc-950 font-black shadow-xs"
                           : "bg-white/15 text-white/90"
@@ -478,9 +534,9 @@ export default function Home() {
                     </span>
                   </div>
 
-                  {/* Title Label: Visible on all screens */}
+                  {/* Title Label */}
                   <p
-                    className={`text-[9px] sm:text-xs font-black tracking-tight truncate pt-0.5 sm:pt-1 transition-colors ${
+                    className={`text-xs font-black tracking-tight truncate pt-1 transition-colors ${
                       isActive ? "text-white" : "text-white/80 group-hover:text-white"
                     }`}
                   >

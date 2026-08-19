@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { X } from "lucide-react"
+import { X, UploadCloud, Pencil } from "lucide-react"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 
 interface Product {
   _id: string
@@ -27,18 +28,20 @@ export default function EditProductModal({ product, onClose, onUpdated }: Props)
   const [images, setImages] = useState<File[]>([])
   const [loading, setLoading] = useState(false)
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
     if (!name || !description || !price || !stock || !category) {
-      toast.error("Please fill all fields")
+      toast.error("Please fill in all required fields")
       return
     }
 
     const formData = new FormData()
-    formData.append("name", name)
-    formData.append("description", description)
+    formData.append("name", name.trim())
+    formData.append("description", description.trim())
     formData.append("price", price)
     formData.append("stock", stock)
-    formData.append("category", category)
+    formData.append("category", category.trim())
 
     if (images.length > 0) {
       images.forEach((file) => formData.append("images", file))
@@ -75,66 +78,142 @@ export default function EditProductModal({ product, onClose, onUpdated }: Props)
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-6 text-black dark:text-white relative space-y-4">
-        <button
-          className="absolute top-3 right-3 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white"
-          onClick={onClose}
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-lg bg-card border border-border/80 rounded-3xl shadow-2xl p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto space-y-4 sm:space-y-5 animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between border-b pb-4">
+          <div>
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Pencil className="w-4 h-4 text-primary" /> Edit Product Details
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Update product info, pricing, category, and inventory levels
+            </p>
+          </div>
 
-        <h2 className="text-xl font-semibold">Edit Product</h2>
-
-        <div className="space-y-3">
-          <input
-            placeholder="Product Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white"
-          />
-          <input
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white"
-          />
-          <input
-            type="number"
-            placeholder="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white"
-          />
-          <input
-            placeholder="Category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white"
-          />
-          <input
-            type="number"
-            placeholder="Stock"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-white"
-          />
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={(e) => setImages(Array.from(e.target.files || []))}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded-md file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:bg-zinc-200 dark:file:bg-zinc-700 dark:file:text-white"
-          />
+          <button
+            className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition"
+            onClick={onClose}
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <button
-          onClick={handleUpdate}
-          disabled={loading}
-          className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-        >
-          {loading ? "Updating..." : "Update Product"}
-        </button>
+        <form onSubmit={handleUpdate} className="space-y-4 text-xs">
+          {/* Product Name */}
+          <div className="space-y-1.5">
+            <label className="font-semibold text-foreground">Product Title *</label>
+            <input
+              type="text"
+              placeholder="Product Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-primary/40 text-foreground text-xs"
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1.5">
+            <label className="font-semibold text-foreground">Description *</label>
+            <textarea
+              rows={3}
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-primary/40 text-foreground text-xs resize-none"
+              required
+            />
+          </div>
+
+          {/* Price & Stock */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">Price (₹) *</label>
+              <input
+                type="number"
+                placeholder="Price"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-primary/40 text-foreground text-xs"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">Stock *</label>
+              <input
+                type="number"
+                placeholder="Stock"
+                min="0"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-primary/40 text-foreground text-xs"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Category */}
+          <div className="space-y-1.5">
+            <label className="font-semibold text-foreground">Category *</label>
+            <input
+              type="text"
+              placeholder="Category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/20 focus:outline-none focus:ring-2 focus:ring-primary/40 text-foreground text-xs"
+              required
+            />
+          </div>
+
+          {/* Replace/Add Images */}
+          <div className="space-y-1.5">
+            <label className="font-semibold text-foreground">Update Images (Optional)</label>
+            <div className="border-2 border-dashed border-border rounded-2xl p-4 text-center bg-muted/10 hover:bg-muted/20 transition relative cursor-pointer">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => setImages(Array.from(e.target.files || []))}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <UploadCloud className="w-8 h-8 text-muted-foreground mx-auto mb-1" />
+              <p className="text-xs font-semibold text-foreground">
+                Upload new image files to replace current images
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Leave empty to keep existing images
+              </p>
+              {images.length > 0 && (
+                <div className="mt-2 inline-block px-3 py-1 bg-primary/10 text-primary rounded-lg text-xs font-bold">
+                  {images.length} new image{images.length > 1 ? "s" : ""} selected
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2.5 pt-3 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onClose}
+              disabled={loading}
+              className="rounded-xl text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="rounded-xl text-xs font-bold shadow-xs"
+            >
+              {loading ? "Updating..." : "Update Product"}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   )

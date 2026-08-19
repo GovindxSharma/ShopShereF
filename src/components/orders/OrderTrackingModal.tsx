@@ -164,8 +164,9 @@ export default function OrderTrackingModal({ open, onClose, order }: Props) {
                     <p className="font-bold text-foreground">{evt.title}</p>
                     <p className="text-[11px] text-muted-foreground">{evt.description}</p>
                     {evt.location && (
-                      <p className="text-[10px] text-primary font-medium mt-0.5">
-                        📍 {evt.location}
+                      <p className="text-[10px] text-primary font-medium mt-0.5 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-primary shrink-0" />
+                        <span>{evt.location}</span>
                       </p>
                     )}
                   </div>
