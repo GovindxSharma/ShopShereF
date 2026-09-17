@@ -1,53 +1,51 @@
 // src/App.tsx
+import { lazy, Suspense, useEffect } from "react"
 import { Routes, Route, Link } from "react-router-dom"
-import { useEffect } from "react"
 import { useAppDispatch } from "@/redux/hooks"
-import { useSelector } from "react-redux"
 import { setUser, clearUser } from "@/redux/slices/authSlice"
 import { fetchCart } from "@/redux/slices/cartSlice"
-import type { RootState } from "@/redux/store"
 
 import Navbar from "@/components/layout/Navbar"
 import Home from "@/pages/Home"
-import ProductsPage from "@/pages/products/Products"
-import ProductDetail from "@/pages/products/ProductDetail"
-import CartPage from "@/pages/CartPage"
-import Login from "@/pages/auth/Login"
-import Register from "@/pages/auth/RegisterPage"
-import ForgotPassword from "@/pages/auth/ForgotPassword"
-import ResetPassword from "@/pages/auth/ResetPassword"
-import UpdatePassword from "@/pages/auth/UpdatePassword"
-import UserOrders from "@/pages/user/UserOrders"
-import ProfilePage from "@/pages/user/ProfilePage"
-import WishlistPage from "@/pages/user/WishlistPage"
-import CheckoutPage from "@/pages/CheckOut"
-
-import AdminDashboard from "@/pages/admin/AdminDashboard"
-import AdminOrders from "@/pages/admin/AdminOrders"
-import AdminProducts from "@/pages/admin/AdminProducts"
-import AdminUsers from "@/pages/admin/AdminUsers"
-import AdminCoupons from "@/pages/admin/AdminCoupons"
-import AdminOrderDetailsPage from "./pages/admin/AdminOrderDetailsPage"
-import DeliveryDashboard from "@/pages/delivery/DeliveryDashboard"
-import NotFoundPage from "@/pages/NotFoundPage"
 
 import ProtectedRoute from "@/components/routes/ProtectedRoute"
 import UnauthenticatedRoute from "@/components/routes/UnauthenticatedRoute"
 import AdminRoute from "@/components/routes/AdminRoute"
 import DeliveryRoute from "@/components/routes/DeliveryRoute"
 
-import ChatBot from "./components/chatbot/Chatbot"
-import "./App.css"
-import Loader from "@/components/common/Loader"
+import { PageFallbackSkeleton } from "@/components/common/Skeletons"
 import ScrollToTop from "@/components/common/ScrollToTop"
+import "./App.css"
+
+// 🚀 Code Splitting: Lazy load non-homepage pages for maximum Lighthouse performance
+const ProductsPage = lazy(() => import("@/pages/products/Products"))
+const ProductDetail = lazy(() => import("@/pages/products/ProductDetail"))
+const CartPage = lazy(() => import("@/pages/CartPage"))
+const Login = lazy(() => import("@/pages/auth/Login"))
+const Register = lazy(() => import("@/pages/auth/RegisterPage"))
+const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword"))
+const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"))
+const UpdatePassword = lazy(() => import("@/pages/auth/UpdatePassword"))
+const UserOrders = lazy(() => import("@/pages/user/UserOrders"))
+const ProfilePage = lazy(() => import("@/pages/user/ProfilePage"))
+const WishlistPage = lazy(() => import("@/pages/user/WishlistPage"))
+const CheckoutPage = lazy(() => import("@/pages/CheckOut"))
+
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"))
+const AdminOrders = lazy(() => import("@/pages/admin/AdminOrders"))
+const AdminProducts = lazy(() => import("@/pages/admin/AdminProducts"))
+const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"))
+const AdminCoupons = lazy(() => import("@/pages/admin/AdminCoupons"))
+const AdminOrderDetailsPage = lazy(() => import("./pages/admin/AdminOrderDetailsPage"))
+const DeliveryDashboard = lazy(() => import("@/pages/delivery/DeliveryDashboard"))
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"))
+const ChatBot = lazy(() => import("./components/chatbot/Chatbot"))
 
 function App() {
   const dispatch = useAppDispatch()
-  const { loading } = useSelector((state: RootState) => state.auth)
-
   const API_BASE = import.meta.env.VITE_API_BASE_URL
 
-  // ✅ Fetch user on app load
+  // ✅ Fetch user on app load non-blockingly
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -57,6 +55,7 @@ function App() {
         const data = await res.json()
         if (res.ok && data.user) {
           dispatch(setUser(data.user))
+          dispatch(fetchCart())
         } else {
           dispatch(clearUser())
         }
@@ -68,69 +67,59 @@ function App() {
     fetchUser()
   }, [API_BASE, dispatch])
 
-  // ✅ Fetch cart on app load
-  useEffect(() => {
-    dispatch(fetchCart())
-  }, [dispatch])
-
-  // ⏳ Wait until auth is resolved
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen text-xl bg-background">
-        <Loader />
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
       <ScrollToTop />
       <Navbar />
       <main className="flex-grow">
-        <Routes>
-          {/* 🌍 Public */}
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
+        <Suspense fallback={<PageFallbackSkeleton />}>
+          <Routes>
+            {/* 🌍 Public */}
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
 
-          {/* 🔒 Authenticated */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/update-password" element={<UpdatePassword />} />
-            <Route path="/orders" element={<UserOrders />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-          </Route>
+            {/* 🔒 Authenticated */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/update-password" element={<UpdatePassword />} />
+              <Route path="/orders" element={<UserOrders />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+            </Route>
 
-          {/* 🚫 Not logged in */}
-          <Route element={<UnauthenticatedRoute />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-          </Route>
+            {/* 🚫 Not logged in */}
+            <Route element={<UnauthenticatedRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+            </Route>
 
-          {/* 🛡️ Admin */}
-          <Route element={<AdminRoute />}>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/orders" element={<AdminOrders />} />
-            <Route path="/admin/products" element={<AdminProducts />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/coupons" element={<AdminCoupons />} />
-            <Route path="/admin/orders/:id" element={<AdminOrderDetailsPage />} />
-          </Route>
+            {/* 🛡️ Admin */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/coupons" element={<AdminCoupons />} />
+              <Route path="/admin/orders/:id" element={<AdminOrderDetailsPage />} />
+            </Route>
 
-          {/* 🚚 Logistics & Delivery Executive Portal */}
-          <Route element={<DeliveryRoute />}>
-            <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
-          </Route>
+            {/* 🚚 Logistics & Delivery Executive Portal */}
+            <Route element={<DeliveryRoute />}>
+              <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+            </Route>
 
-          {/* 🔍 404 Catch-All */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            {/* 🔍 404 Catch-All */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
 
-        <ChatBot />
+        <Suspense fallback={null}>
+          <ChatBot />
+        </Suspense>
       </main>
 
       {/* 🌟 Modern Footer */}

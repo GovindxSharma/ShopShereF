@@ -27,6 +27,21 @@ declare global {
   }
 }
 
+const loadRazorpayScript = () => {
+  return new Promise<boolean>((resolve) => {
+    if (typeof window !== "undefined" && window.Razorpay) {
+      resolve(true)
+      return
+    }
+    const script = document.createElement("script")
+    script.src = "https://checkout.razorpay.com/v1/checkout.js"
+    script.async = true
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
+}
+
 export default function CheckoutPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
@@ -49,6 +64,11 @@ export default function CheckoutPage() {
   // Read saved discount from sessionStorage
   const [couponCode, setCouponCode] = useState("")
   const [discountAmount, setDiscountAmount] = useState(0)
+
+  // Dynamically load Razorpay only when user enters checkout
+  useEffect(() => {
+    loadRazorpayScript()
+  }, [])
 
   useEffect(() => {
     const savedCoupon = sessionStorage.getItem("shopshere_coupon")
@@ -147,22 +167,25 @@ export default function CheckoutPage() {
     // Option 2: Razorpay Payment Gateway
     try {
       if (!window.Razorpay) {
-        toast.warning("Razorpay script not loaded. Switching to Instant Demo Checkout.")
-        await dispatch(
-          createDemoOrder({
-            items: orderItems,
-            shippingAddress: address,
-            totalAmount,
-            discountAmount,
-            couponCode,
-            paymentMethod: "demo",
-          })
-        ).then(unwrapResult)
+        const loaded = await loadRazorpayScript()
+        if (!loaded || !window.Razorpay) {
+          toast.warning("Razorpay script not loaded. Switching to Instant Demo Checkout.")
+          await dispatch(
+            createDemoOrder({
+              items: orderItems,
+              shippingAddress: address,
+              totalAmount,
+              discountAmount,
+              couponCode,
+              paymentMethod: "demo",
+            })
+          ).then(unwrapResult)
 
-        await dispatch(fetchCart())
-        toast.success("Order placed successfully via Instant Mode!")
-        navigate("/orders")
-        return
+          await dispatch(fetchCart())
+          toast.success("Order placed successfully via Instant Mode!")
+          navigate("/orders")
+          return
+        }
       }
 
       const razorRes = await dispatch(createRazorpayOrder(totalAmount)).then(unwrapResult)

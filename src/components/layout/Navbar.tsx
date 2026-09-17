@@ -25,8 +25,7 @@ import { ModeToggle } from "@/components/ui/mode-toggle"
 import { selectCartCount } from "@/redux/slices/cartSlice"
 import { selectWishlistItems } from "@/redux/slices/wishlistSlice"
 import { motion, AnimatePresence } from "framer-motion"
-import Fuse from "fuse.js"
-import type { Product } from "@/types/product"
+import CommandSearchModal from "@/components/common/CommandSearchModal"
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -40,11 +39,9 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [query, setQuery] = useState("")
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const searchModalRef = useRef<HTMLDivElement>(null)
 
   const user = useAppSelector((state) => state.auth.user)
   const cartCount = useAppSelector(selectCartCount)
@@ -74,18 +71,21 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  // ⌨️ Global Command+K (macOS) / Ctrl+K (Windows/Linux) & Escape listener
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (
-        searchOpen &&
-        searchModalRef.current &&
-        !searchModalRef.current.contains(e.target as Node)
-      ) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        setSearchOpen((prev) => !prev)
+      }
+      if (e.key === "Escape" && searchOpen) {
+        e.preventDefault()
         setSearchOpen(false)
       }
     }
-    document.addEventListener("mousedown", handleOutsideClick)
-    return () => document.removeEventListener("mousedown", handleOutsideClick)
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
   }, [searchOpen])
 
   return (
@@ -137,25 +137,42 @@ export default function Navbar() {
           )}
 
           {/* Actions & Profile */}
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            {/* Quick Search Button (Always accessible) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {/* Desktop Command-K Search Launcher Pill */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search catalog (Cmd+K)"
+              className="hidden sm:flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full border border-border/70 bg-muted/30 hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-medium transition shadow-2xs group cursor-pointer"
+            >
+              <Search className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="hidden md:inline">Search drops, kicks, gear...</span>
+              <span className="inline md:hidden">Search...</span>
+              <kbd className="ml-1 font-mono text-[10px] px-1.5 py-0.5 rounded bg-background border border-border/80 font-bold text-muted-foreground shadow-2xs group-hover:border-primary/40 transition-colors">
+                ⌘K
+              </kbd>
+            </button>
+
+            {/* Mobile Quick Search Button */}
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Search catalog"
               onClick={() => setSearchOpen(true)}
-              className="rounded-full hover:bg-muted w-8 h-8 sm:w-9 sm:h-9"
+              className="sm:hidden rounded-full hover:bg-muted w-8 h-8 text-foreground"
               title="Search products (Cmd+K)"
             >
-              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
+              <Search className="w-4 h-4" />
             </Button>
 
             {user?.role !== "delivery" && (
               <>
                 {/* Desktop-only Wishlist Button (mobile uses bottom bar) */}
-                <Link to="/wishlist" className="relative hidden md:block">
+                <Link to="/wishlist" className="relative hidden md:block" aria-label="Wishlist">
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label="Wishlist"
                     className="rounded-full hover:bg-muted w-9 h-9"
                     title="Wishlist"
                   >
@@ -169,10 +186,11 @@ export default function Navbar() {
                 </Link>
 
                 {/* Desktop-only Cart Button (mobile uses bottom bar) */}
-                <Link to="/cart" className="relative hidden md:block">
+                <Link to="/cart" className="relative hidden md:block" aria-label="Shopping Cart">
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label="Shopping Cart"
                     className="rounded-full hover:bg-muted w-9 h-9"
                     title="Shopping Cart"
                   >
@@ -195,6 +213,8 @@ export default function Navbar() {
               <div ref={dropdownRef} className="relative hidden sm:block">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
+                  aria-label="User Account Menu"
+                  aria-expanded={dropdownOpen}
                   className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border border-border bg-card hover:bg-muted transition text-sm font-medium shadow-xs"
                 >
                   <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold uppercase">
@@ -363,6 +383,7 @@ export default function Navbar() {
                   </span>
                   <button
                     onClick={() => setMenuOpen(false)}
+                    aria-label="Close navigation menu"
                     className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition"
                   >
                     <X className="w-5 h-5" />
@@ -523,50 +544,11 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Global Quick Search Modal */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-center pt-20 px-4">
-          <div
-            ref={searchModalRef}
-            className="w-full max-w-2xl bg-card shadow-2xl border rounded-2xl p-6 relative max-h-[500px] flex flex-col animate-in fade-in zoom-in-95 duration-200"
-          >
-            <div className="relative mb-4">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && query.trim()) {
-                    navigate(`/products?search=${encodeURIComponent(query.trim())}`)
-                    setSearchOpen(false)
-                    setQuery("")
-                  }
-                }}
-                placeholder="Search smartphones, laptops, audio, shoes, brands..."
-                className="w-full pl-11 pr-10 py-3 rounded-xl border bg-muted/30 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-medium placeholder:text-muted-foreground"
-                autoFocus
-              />
-              {query && (
-                <button
-                  onClick={() => setQuery("")}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            <LiveProductResults
-              query={query}
-              onSelect={() => {
-                setSearchOpen(false)
-                setQuery("")
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {/* Global Command-K Quick Search Modal */}
+      <CommandSearchModal
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
 
       {/* 📱 Mobile Bottom Navigation Bar (sm:hidden) */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 py-2 px-3 flex justify-around items-center shadow-lg">
@@ -598,7 +580,7 @@ export default function Navbar() {
             <Link
               to="/"
               className={clsx(
-                "flex flex-col items-center gap-1 text-[10px] font-bold transition relative",
+                "flex flex-col items-center justify-center h-full min-w-[52px] px-2 gap-1 text-[10px] font-bold transition relative touch-manipulation",
                 pathname === "/" ? "text-primary font-black" : "text-muted-foreground"
               )}
             >
@@ -609,7 +591,7 @@ export default function Navbar() {
             <Link
               to="/products"
               className={clsx(
-                "flex flex-col items-center gap-1 text-[10px] font-bold transition relative",
+                "flex flex-col items-center justify-center h-full min-w-[52px] px-2 gap-1 text-[10px] font-bold transition relative touch-manipulation",
                 pathname === "/products" ? "text-primary font-black" : "text-muted-foreground"
               )}
             >
@@ -620,7 +602,7 @@ export default function Navbar() {
             <Link
               to="/wishlist"
               className={clsx(
-                "flex flex-col items-center gap-1 text-[10px] font-bold transition relative",
+                "flex flex-col items-center justify-center h-full min-w-[52px] px-2 gap-1 text-[10px] font-bold transition relative touch-manipulation",
                 pathname === "/wishlist" ? "text-primary font-black" : "text-muted-foreground"
               )}
             >
@@ -638,7 +620,7 @@ export default function Navbar() {
             <Link
               to="/cart"
               className={clsx(
-                "flex flex-col items-center gap-1 text-[10px] font-bold transition relative",
+                "flex flex-col items-center justify-center h-full min-w-[52px] px-2 gap-1 text-[10px] font-bold transition relative touch-manipulation",
                 pathname === "/cart" ? "text-primary font-black" : "text-muted-foreground"
               )}
             >
@@ -656,7 +638,7 @@ export default function Navbar() {
             <Link
               to={user ? (user.role === "admin" ? "/admin/dashboard" : "/profile") : "/login"}
               className={clsx(
-                "flex flex-col items-center gap-1 text-[10px] font-bold transition relative",
+                "flex flex-col items-center justify-center h-full min-w-[52px] px-2 gap-1 text-[10px] font-bold transition relative touch-manipulation",
                 pathname === "/profile" || pathname.startsWith("/admin") || pathname === "/login"
                   ? "text-primary font-black"
                   : "text-muted-foreground"
@@ -672,104 +654,3 @@ export default function Navbar() {
   )
 }
 
-function LiveProductResults({
-  query,
-  onSelect,
-}: {
-  query: string
-  onSelect: () => void
-}) {
-  const [allProducts, setAllProducts] = useState<Product[]>([])
-  const [results, setResults] = useState<Product[]>([])
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    const fetchAllProducts = async () => {
-      try {
-        setLoading(true)
-        const API_BASE = import.meta.env.VITE_API_BASE_URL
-        const res = await fetch(`${API_BASE}/products/all`)
-        const data = await res.json()
-        setAllProducts(data.products || [])
-      } catch (err) {
-        console.error("Failed to fetch products for live search", err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchAllProducts()
-  }, [])
-
-  useEffect(() => {
-    if (!query.trim() || allProducts.length === 0) {
-      setResults([])
-      return
-    }
-
-    const fuse = new Fuse(allProducts, {
-      keys: ["name", "category", "description"],
-      threshold: 0.35,
-    })
-
-    const matches = fuse.search(query).map((match) => match.item)
-    setResults(matches)
-  }, [query, allProducts])
-
-  if (!query.trim()) {
-    return (
-      <div className="py-6 text-center text-sm text-muted-foreground">
-        Type to search across all products, brands, and categories.
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex-1 overflow-y-auto space-y-2 pr-1 divide-y divide-border/40">
-      {loading && (
-        <p className="text-sm text-muted-foreground text-center py-4">
-          Loading catalog...
-        </p>
-      )}
-      {!loading && results.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-sm font-medium">No matching products found.</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Press Enter to view all results on the products page.
-          </p>
-        </div>
-      )}
-      {results.slice(0, 6).map((product) => (
-        <div
-          key={product._id}
-          className="flex justify-between items-center p-3 rounded-xl hover:bg-muted/60 transition cursor-pointer group"
-          onClick={() => {
-            navigate(`/products/${product._id}`)
-            onSelect()
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <img
-              src={product.images?.[0]?.url || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=200&auto=format&fit=crop"}
-              alt={product.name}
-              className="w-12 h-12 object-contain rounded-lg bg-muted/40 p-1 group-hover:scale-105 transition"
-            />
-            <div>
-              <p className="font-semibold text-sm group-hover:text-primary transition line-clamp-1">
-                {product.name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {product.category} · ★ {product.ratings || 5}
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-bold text-primary">
-              ₹{product.price.toLocaleString()}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}

@@ -81,10 +81,12 @@ export default function ChatBot() {
 
   return (
     <>
-      {/* Floating Launcher Button */}
+      {/* Floating Launcher Button - positioned safely above mobile bottom nav */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-50 p-3.5 rounded-full bg-primary text-primary-foreground shadow-2xl hover:scale-108 active:scale-95 transition-all duration-200 flex items-center justify-center group"
+        className={`fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 p-3 sm:p-3.5 rounded-full bg-primary text-primary-foreground shadow-2xl hover:scale-108 active:scale-95 transition-all duration-200 flex items-center justify-center group ${
+          open ? "hidden sm:flex" : "flex"
+        }`}
         aria-label="Open AI Assistant"
       >
         {open ? (
@@ -126,11 +128,13 @@ export default function ChatBot() {
                 }
                 className="p-1.5 rounded-full hover:bg-white/20 text-white/80 hover:text-white transition"
                 title="Clear Chat"
+                aria-label="Clear chat history"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setOpen(false)}
+                aria-label="Close chat assistant"
                 className="p-1.5 rounded-full hover:bg-white/20 text-white transition"
               >
                 <X className="w-4 h-4" />
@@ -207,6 +211,7 @@ export default function ChatBot() {
             <input
               type="text"
               value={userInput}
+              aria-label="Ask chat assistant a question"
               onChange={(e) => setUserInput(e.target.value)}
               placeholder="Ask about products, orders, coupons..."
               className="flex-1 px-3 py-2 text-xs sm:text-sm rounded-xl border bg-muted/30 focus:outline-none focus:ring-1 focus:ring-primary"
@@ -214,6 +219,7 @@ export default function ChatBot() {
             <Button
               type="submit"
               size="sm"
+              aria-label="Send message"
               disabled={!userInput.trim() || loading}
               className="rounded-xl shadow-xs h-9 px-3"
             >

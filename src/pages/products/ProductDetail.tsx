@@ -29,7 +29,7 @@ import {
 } from "lucide-react"
 import { format, addDays } from "date-fns"
 import { Button } from "@/components/ui/button"
-import Loader from "@/components/common/Loader"
+import { ProductDetailSkeleton } from "@/components/common/Skeletons"
 import ProductCard from "@/components/products/ProductCard"
 
 export default function ProductDetail() {
@@ -172,11 +172,7 @@ export default function ProductDetail() {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-32">
-        <Loader />
-      </div>
-    )
+    return <ProductDetailSkeleton />
   }
 
   if (error) {

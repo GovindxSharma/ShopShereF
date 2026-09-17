@@ -6,6 +6,8 @@ import { addToCart } from "@/redux/slices/cartSlice"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
+import { getOptimizedImageUrl } from "@/utils/imageOptimizer"
+
 interface Props {
   id: string
   name: string
@@ -30,12 +32,14 @@ export default function ProductCard({
   const isInWishlist = useAppSelector(selectIsInWishlist(id))
   const { user } = useAppSelector((state) => state.auth)
 
-  const imageUrl =
+  const rawImageUrl =
     typeof image === "string" && image.trim()
       ? image
       : image?.url
       ? image.url
-      : "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop"
+      : "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=75&w=400&auto=format&fit=crop"
+
+  const imageUrl = getOptimizedImageUrl(rawImageUrl, 400)
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -115,6 +119,10 @@ export default function ProductCard({
             <img
               src={imageUrl}
               alt={name}
+              width="240"
+              height="240"
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-contain group-hover:scale-108 transition-transform duration-300 ease-out"
               onError={(e) =>
                 ((e.target as HTMLImageElement).src =
@@ -126,7 +134,8 @@ export default function ProductCard({
           {/* Wishlist Button */}
           <button
             onClick={handleWishlistToggle}
-            className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2.5 rounded-full backdrop-blur-md shadow-xs transition z-10 ${
+            aria-label={isInWishlist ? `Remove ${name} from wishlist` : `Add ${name} to wishlist`}
+            className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-2 sm:p-2.5 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full backdrop-blur-md shadow-xs transition z-10 cursor-pointer ${
               isInWishlist
                 ? "bg-red-500 text-white shadow-red-500/20"
                 : "bg-background/80 text-foreground/80 hover:text-red-500 hover:bg-background"
@@ -173,9 +182,12 @@ export default function ProductCard({
             <div className="flex items-center text-amber-500">
               <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-500 stroke-amber-500" />
               <span className="text-[11px] sm:text-xs font-bold ml-1 text-foreground">
-                {rating ? Number(rating).toFixed(1) : "5.0"}
+                {rating.toFixed(1)}
               </span>
             </div>
+            <span className="text-[10px] sm:text-[11px] text-muted-foreground">
+              (5.0)
+            </span>
           </div>
 
           {/* Price & Action */}
@@ -191,9 +203,10 @@ export default function ProductCard({
               size="sm"
               onClick={handleAddToCart}
               disabled={stock === 0}
-              className="rounded-xl font-bold px-2 sm:px-3 py-1 text-[11px] sm:text-xs h-7 sm:h-8 shadow-2xs hover:scale-105 transition-transform shrink-0 flex items-center gap-1"
+              aria-label={`Add ${name} to cart`}
+              className="rounded-xl font-bold px-3 py-1.5 text-xs h-9 sm:h-8 shadow-2xs hover:scale-105 active:scale-95 transition-transform shrink-0 flex items-center gap-1.5 min-w-[44px]"
             >
-              <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <ShoppingBag className="w-3.5 h-3.5" />
               <span className="hidden xs:inline">Add</span>
             </Button>
           </div>

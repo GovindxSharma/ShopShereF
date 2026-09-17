@@ -1,17 +1,57 @@
-<!-- public/index.html -->
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ShopSphere</title>
+    <meta name="theme-color" content="#09090b" />
+    <title>ShopSphere | Curated Streetwear, Apparel &amp; Lifestyle Essentials</title>
+    <meta
+      name="description"
+      content="ShopSphere offers signature oversized tees, street kicks, waterproof utility cargo, and EDC essentials with express delivery and instant checkout."
+    />
+    <meta property="og:title" content="ShopSphere | Curated Streetwear &amp; Apparel" />
+    <meta
+      property="og:description"
+      content="Explore premium oversized streetwear, cloud-foam footwear, and lifestyle essentials with instant coupon discounts."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/logo.png" />
+
+    <link rel="canonical" href="https://shopshere.example.com/" />
+
+    <!-- Performance: Preconnect & DNS-Prefetch for CDN & API Origins -->
+    <link rel="preconnect" href="http://localhost:5440" />
+    <link rel="dns-prefetch" href="http://localhost:5440" />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+    <!-- Performance: Preload Critical Above-The-Fold Hero LCP Image -->
+    <link
+      rel="preload"
+      as="image"
+      href="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=75&w=900&auto=format&fit=crop"
+      fetchpriority="high"
+    />
+
+    <!-- SEO: JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "OnlineStore",
+      "name": "ShopSphere",
+      "description": "Curated streetwear, premium oversized apparel, sneakers and lifestyle essentials.",
+      "url": "https://shopshere.example.com/",
+      "logo": "https://shopshere.example.com/logo.png",
+      "priceRange": "₹₹",
+      "currenciesAccepted": "INR"
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-
   </body>
 </html>

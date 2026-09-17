@@ -4,7 +4,7 @@ import { fetchProducts } from "@/redux/slices/productSlice"
 import ProductCard from "@/components/products/ProductCard"
 import FilterSortModal from "@/components/products/FilterSortModal"
 import { categoryList } from "@/components/products/FiltersSidebar"
-import Loader from "@/components/common/Loader"
+import { ProductGridSkeleton } from "@/components/common/Skeletons"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import {
   X,
@@ -268,9 +268,7 @@ export default function ProductsPage() {
       {/* Full-Width Responsive Products Grid */}
       <main className="w-full space-y-6 sm:space-y-8">
         {loading ? (
-          <div className="flex justify-center items-center py-28">
-            <Loader />
-          </div>
+          <ProductGridSkeleton count={8} columns={gridColumns} />
         ) : error ? (
           <div className="text-center py-16 text-red-500 border rounded-3xl p-6 bg-card">
             <p className="text-base font-bold">Failed to load catalog</p>

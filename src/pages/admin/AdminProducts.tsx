@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAppDispatch } from "@/redux/hooks"
+import { invalidateProductCache } from "@/redux/slices/productSlice"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import {
@@ -20,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 const AdminProducts = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
@@ -61,6 +64,7 @@ const AdminProducts = () => {
       if (!res.ok) throw new Error("Delete failed")
 
       setProducts((prev) => prev.filter((p) => p._id !== productToDelete._id))
+      dispatch(invalidateProductCache())
       toast.success("Product deleted successfully")
       setProductToDelete(null)
     } catch {
@@ -140,7 +144,10 @@ const AdminProducts = () => {
 
           <div className="flex-1 sm:flex-initial">
             <CreateProductModal
-              onProductCreated={fetchProducts}
+              onProductCreated={() => {
+                dispatch(invalidateProductCache())
+                fetchProducts()
+              }}
               className="w-full sm:w-auto h-9"
             />
           </div>
@@ -296,7 +303,10 @@ const AdminProducts = () => {
         <EditProductModal
           product={editProduct}
           onClose={() => setEditProduct(null)}
-          onUpdated={fetchProducts}
+          onUpdated={() => {
+            dispatch(invalidateProductCache())
+            fetchProducts()
+          }}
         />
       )}
 

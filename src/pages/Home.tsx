@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { fetchProducts } from "@/redux/slices/productSlice"
 import ProductCard from "@/components/products/ProductCard"
-import Loader from "@/components/common/Loader"
+import { ProductHorizontalTrackSkeleton } from "@/components/common/Skeletons"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
@@ -20,9 +20,10 @@ import {
   Star,
   ShoppingBag,
   Zap,
-  Tag,
   Mail,
   Send,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 
 // 🎨 5 Dedicated Offer-Specific Hero Slides with Real Photography
@@ -30,6 +31,7 @@ const heroSlides = [
   {
     id: 1,
     tag: "Mega Season Clearance",
+    kicker: "FW26 // DROP 01",
     shortTitle: "Oversized Tees",
     discountTag: "60% OFF",
     discountBadge: "UP TO 60% OFF",
@@ -39,13 +41,17 @@ const heroSlides = [
     buttonLink: "/products?category=T-Shirts",
     offerCode: "SUMMER60",
     offerLabel: "Use code SUMMER60 for extra 60% Off",
-    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1600&auto=format&fit=crop",
-    gradient: "from-slate-950 via-zinc-900/90 to-transparent",
-    accentColor: "text-amber-300",
+    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=75&w=900&auto=format&fit=crop",
+    gradient: "from-amber-950/75 via-amber-900/25 to-transparent",
+    accentColor: "text-amber-400",
+    accentBg: "bg-amber-400",
+    accentBorder: "border-amber-400/60",
+    accentGlow: "bg-amber-500/25",
   },
   {
     id: 2,
     tag: "Limited Footwear Drop",
+    kicker: "LIMITED RUN // 500 PAIRS",
     shortTitle: "Street Kicks",
     discountTag: "₹800 OFF",
     discountBadge: "FLAT ₹800 OFF",
@@ -55,13 +61,17 @@ const heroSlides = [
     buttonLink: "/products?category=Shoes",
     offerCode: "KICKS800",
     offerLabel: "Use code KICKS800 on all Footwear",
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1600&auto=format&fit=crop",
-    gradient: "from-blue-950 via-slate-900/90 to-transparent",
-    accentColor: "text-cyan-300",
+    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=75&w=900&auto=format&fit=crop",
+    gradient: "from-cyan-950/75 via-sky-900/25 to-transparent",
+    accentColor: "text-cyan-400",
+    accentBg: "bg-cyan-400",
+    accentBorder: "border-cyan-400/60",
+    accentGlow: "bg-cyan-500/25",
   },
   {
     id: 3,
     tag: "Technical Utility Rush",
+    kicker: "MODULAR CARGO // UTILITY",
     shortTitle: "Tactical Cargo",
     discountTag: "B1G1 50%",
     discountBadge: "BUY 1 GET 1 @ 50%",
@@ -71,13 +81,17 @@ const heroSlides = [
     buttonLink: "/products?category=Pants",
     offerCode: "CARGO50",
     offerLabel: "Buy 1 Get 1 at 50% with code CARGO50",
-    image: "https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?q=80&w=1600&auto=format&fit=crop",
-    gradient: "from-emerald-950 via-stone-900/90 to-transparent",
-    accentColor: "text-emerald-300",
+    image: "https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?q=75&w=900&auto=format&fit=crop",
+    gradient: "from-emerald-950/75 via-teal-900/25 to-transparent",
+    accentColor: "text-emerald-400",
+    accentBg: "bg-emerald-400",
+    accentBorder: "border-emerald-400/60",
+    accentGlow: "bg-emerald-500/25",
   },
   {
     id: 4,
     tag: "Everyday Carry Specials",
+    kicker: "WEATHERPROOF // CORDURA",
     shortTitle: "EDC Bags",
     discountTag: "20% OFF",
     discountBadge: "EXTRA 20% OFF",
@@ -87,13 +101,17 @@ const heroSlides = [
     buttonLink: "/products?category=Bags",
     offerCode: "CARRY20",
     offerLabel: "Use code CARRY20 for instant 20% discount",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1600&auto=format&fit=crop",
-    gradient: "from-purple-950 via-slate-900/90 to-transparent",
-    accentColor: "text-purple-300",
+    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=75&w=900&auto=format&fit=crop",
+    gradient: "from-purple-950/75 via-indigo-900/25 to-transparent",
+    accentColor: "text-purple-400",
+    accentBg: "bg-purple-400",
+    accentBorder: "border-purple-400/60",
+    accentGlow: "bg-purple-500/25",
   },
   {
     id: 5,
     tag: "VIP Luxury Member Drop",
+    kicker: "HANDCRAFTED // STEEL & LEATHER",
     shortTitle: "VIP Watches",
     discountTag: "₹1,000 OFF",
     discountBadge: "FLAT ₹1,000 OFF",
@@ -103,9 +121,12 @@ const heroSlides = [
     buttonLink: "/products?category=Accessories",
     offerCode: "VIP1000",
     offerLabel: "Save flat ₹1,000 on orders above ₹2,999",
-    image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1600&auto=format&fit=crop",
-    gradient: "from-rose-950 via-neutral-900/90 to-transparent",
-    accentColor: "text-rose-300",
+    image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=75&w=900&auto=format&fit=crop",
+    gradient: "from-rose-950/75 via-rose-900/25 to-transparent",
+    accentColor: "text-rose-400",
+    accentBg: "bg-rose-400",
+    accentBorder: "border-rose-400/60",
+    accentGlow: "bg-rose-500/25",
   },
 ]
 
@@ -115,67 +136,87 @@ const categoryCards = [
     name: "T-Shirts",
     label: "Graphic & Plain Tees",
     count: "40+ Styles",
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=70&w=350&auto=format&fit=crop",
   },
   {
     name: "Pants",
     label: "Cargoes & Chinos",
     count: "25+ Styles",
-    image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=70&w=350&auto=format&fit=crop",
   },
   {
     name: "Shoes",
     label: "Sneakers & Kicks",
     count: "30+ Models",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=70&w=350&auto=format&fit=crop",
   },
   {
     name: "Bags",
     label: "EDC & Travel Bags",
     count: "18+ Designs",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=70&w=350&auto=format&fit=crop",
   },
   {
     name: "Accessories",
     label: "Watches & Gear",
     count: "20+ Items",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=70&w=350&auto=format&fit=crop",
   },
 ]
 
-// 🎟️ Live Promo Vouchers Vault
+// 🎟️ Live Promo Vouchers Vault (Light Shade Palette, Simple, Premium & Professional)
 const promoVouchers = [
   {
     code: "SHOPSHERE10",
     discount: "10% OFF",
     title: "Sitewide All Products",
-    minSpend: "₹999 Min Spend",
+    minSpend: "Min spend ₹999",
     expiry: "Active Today",
-    theme: "from-blue-600 to-indigo-700",
+    badge: "Most Popular",
+    borderClass: "border-amber-500/20 hover:border-amber-500/40",
+    bgClass: "bg-amber-500/[0.03] dark:bg-amber-400/[0.05]",
+    badgeClass: "bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20",
+    accentClass: "text-amber-700 dark:text-amber-400",
+    glowClass: "bg-amber-500/10",
   },
   {
     code: "FREESHIP",
     discount: "FREE EXPRESS DELIVERY",
     title: "Zero Shipping Charges",
-    minSpend: "₹499 Min Spend",
+    minSpend: "Min spend ₹499",
     expiry: "Limited Slots",
-    theme: "from-emerald-600 to-teal-700",
+    badge: "Auto Applied",
+    borderClass: "border-emerald-500/20 hover:border-emerald-500/40",
+    bgClass: "bg-emerald-500/[0.03] dark:bg-emerald-400/[0.05]",
+    badgeClass: "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20",
+    accentClass: "text-emerald-700 dark:text-emerald-400",
+    glowClass: "bg-emerald-500/10",
   },
   {
     code: "FESTIVE20",
     discount: "FLAT ₹500 OFF",
     title: "Grand Seasonal Megasale",
-    minSpend: "₹2,499 Min Spend",
+    minSpend: "Min spend ₹2,499",
     expiry: "Weekend Special",
-    theme: "from-purple-600 to-pink-700",
+    badge: "Limited Run",
+    borderClass: "border-sky-500/20 hover:border-sky-500/40",
+    bgClass: "bg-sky-500/[0.03] dark:bg-sky-400/[0.05]",
+    badgeClass: "bg-sky-500/10 text-sky-800 dark:text-sky-300 border border-sky-500/20",
+    accentClass: "text-sky-700 dark:text-sky-400",
+    glowClass: "bg-sky-500/10",
   },
   {
     code: "VIP1000",
     discount: "FLAT ₹1,000 OFF",
     title: "Luxury & Accessories Bundle",
-    minSpend: "₹2,999 Min Spend",
+    minSpend: "Min spend ₹2,999",
     expiry: "Exclusive Pass",
-    theme: "from-amber-600 to-rose-700",
+    badge: "VIP Members",
+    borderClass: "border-rose-500/20 hover:border-rose-500/40",
+    bgClass: "bg-rose-500/[0.03] dark:bg-rose-400/[0.05]",
+    badgeClass: "bg-rose-500/10 text-rose-800 dark:text-rose-300 border border-rose-500/20",
+    accentClass: "text-rose-700 dark:text-rose-400",
+    glowClass: "bg-rose-500/10",
   },
 ]
 
@@ -214,6 +255,7 @@ export default function Home() {
 
   // 🎠 Carousel State
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0)
+  const [isHeroHovered, setIsHeroHovered] = useState(false)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [newsletterEmail, setNewsletterEmail] = useState("")
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false)
@@ -242,13 +284,14 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [])
 
-  // ⏱️ Auto-play Hero Carousel every 5.5 seconds
+  // ⏱️ Auto-play Hero Carousel every 5.5 seconds (Pauses smoothly on hover)
   useEffect(() => {
+    if (isHeroHovered) return
     const timer = setInterval(() => {
       setCurrentHeroIndex((prev) => (prev + 1) % heroSlides.length)
     }, 5500)
     return () => clearInterval(timer)
-  }, [])
+  }, [isHeroHovered])
 
   // 📱 Touch Gesture Handlers for Mobile Swipe
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -291,66 +334,124 @@ export default function Home() {
   const currentSlide = heroSlides[currentHeroIndex]
 
   return (
-    <main className="space-y-12 sm:space-y-20 pb-28 sm:pb-20 overflow-hidden">
+    <main className="space-y-8 sm:space-y-14 pb-28 sm:pb-20 overflow-hidden">
       {/* ========================================================================= */}
-      {/* 🌟 1. ELEGANT TOUCH-SWIPE HERO SHOWCASE WITH 5 INTERACTIVE SLIDE TABS */}
+      {/* 🌟 1. CINEMATIC LUXURY HERO SHOWCASE WITH DYNAMIC AMBIENT LIGHTING */}
       {/* ========================================================================= */}
-      <section
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className="relative w-full overflow-hidden bg-black text-white min-h-[620px] sm:min-h-[680px] lg:min-h-[720px] flex flex-col justify-between pt-8 sm:pt-14 pb-5 sm:pb-8 select-none"
-      >
-        {/* Background Image Carousel with Fade Animation */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide.id}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="absolute inset-0 z-0"
-          >
-            <img
-              src={currentSlide.image}
-              alt={currentSlide.title}
-              className="w-full h-full object-cover object-center"
-            />
-            {/* Multi-layer High-Contrast Gradient Scrim Overlays */}
-            <div className={`absolute inset-0 bg-gradient-to-r ${currentSlide.gradient}`} />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/40 sm:to-transparent" />
-            <div className="absolute inset-0 bg-black/35 backdrop-blur-[0.5px]" />
-          </motion.div>
-        </AnimatePresence>
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-1 sm:mt-3">
+        <div
+          onMouseEnter={() => setIsHeroHovered(true)}
+          onMouseLeave={() => setIsHeroHovered(false)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="relative w-full rounded-3xl sm:rounded-[2.5rem] overflow-hidden bg-zinc-950 text-white min-h-[500px] sm:min-h-[540px] lg:h-[600px] flex flex-col justify-between p-5 sm:p-10 lg:p-12 select-none shadow-2xl border border-white/10 group/hero"
+        >
+          {/* Dynamic Ambient Glow Orb (Behind Typography) */}
+          <div
+            className={`absolute -top-16 -left-16 w-80 sm:w-[500px] h-80 sm:h-[500px] rounded-full blur-[100px] pointer-events-none transition-all duration-700 ${currentSlide.accentGlow}`}
+          />
 
-        {/* Content Container */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
-          <div className="max-w-2xl space-y-3.5 sm:space-y-4.5">
-            {/* Badges Row */}
+          {/* Background Image Carousel with Smooth Ken-Burns Fade */}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={currentSlide.id}
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="absolute inset-0 z-0"
+            >
+              <img
+                src={currentSlide.image}
+                alt={currentSlide.title}
+                width="900"
+                height="600"
+                fetchPriority={currentHeroIndex === 0 ? "high" : "auto"}
+                loading={currentHeroIndex === 0 ? "eager" : "lazy"}
+                decoding="async"
+                className="w-full h-full object-cover object-center"
+              />
+              {/* Vibrant Slide-Specific Color Scrim */}
+              <div className={`absolute inset-0 bg-gradient-to-r ${currentSlide.gradient}`} />
+              {/* Soft Directional Contrast Gradients for Editorial Typography */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-transparent sm:w-2/3" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent pointer-events-none" />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Top Row: Floating Kicker / Badges & Sleek Slide Controls */}
+          <div className="relative z-10 flex items-center justify-between gap-3">
             <motion.div
               key={`badge-${currentSlide.id}`}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-wrap items-center gap-2"
+              transition={{ duration: 0.3 }}
+              className="flex flex-wrap items-center gap-2 sm:gap-2.5"
             >
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-400 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-lg">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${currentSlide.accentBg} text-zinc-950 text-xs font-black uppercase tracking-wider shadow-md`}>
                 <Sparkles className="w-3.5 h-3.5 fill-current" />
                 {currentSlide.discountBadge}
               </span>
 
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold uppercase tracking-wider shadow-xs">
-                {currentSlide.tag}
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-xl border border-white/20 text-white text-[11px] font-mono font-bold uppercase tracking-widest">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                {currentSlide.kicker}
               </span>
             </motion.div>
+
+            {/* Quick Arrow Controllers with Counter */}
+            <div className="hidden sm:flex items-center gap-1.5 bg-black/45 backdrop-blur-xl p-1 rounded-full border border-white/15 shadow-xl">
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentHeroIndex((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
+                }
+                aria-label="Previous hero slide"
+                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full hover:bg-white/20 flex items-center justify-center text-white transition active:scale-90 cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-1 px-2">
+                <span className="text-xs font-mono font-bold text-white">0{currentHeroIndex + 1}</span>
+                <span className="text-[10px] font-mono text-white/40">/</span>
+                <span className="text-xs font-mono text-white/60">0{heroSlides.length}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentHeroIndex((prev) => (prev + 1) % heroSlides.length)
+                }
+                aria-label="Next hero slide"
+                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full hover:bg-white/20 flex items-center justify-center text-white transition active:scale-90 cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Middle Content Container: Editorial Streetwear Typography */}
+          <div className="relative z-10 max-w-2xl space-y-3.5 sm:space-y-4 my-auto py-4">
+            <motion.p
+              key={`tag-${currentSlide.id}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`text-xs sm:text-sm font-mono font-extrabold uppercase tracking-widest ${currentSlide.accentColor}`}
+            >
+              {currentSlide.tag}
+            </motion.p>
 
             {/* Title */}
             <motion.h1
               key={`title-${currentSlide.id}`}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15] text-white drop-shadow-md"
+              transition={{ duration: 0.35, delay: 0.08 }}
+              className="text-2xl sm:text-4xl md:text-5xl lg:text-[52px] font-black tracking-tight leading-[1.08] text-white drop-shadow-lg"
             >
               {currentSlide.title}
             </motion.h1>
@@ -358,80 +459,65 @@ export default function Home() {
             {/* Description */}
             <motion.p
               key={`desc-${currentSlide.id}`}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.18 }}
-              className="text-xs sm:text-sm md:text-base text-zinc-100 leading-relaxed font-medium line-clamp-2 sm:line-clamp-3 drop-shadow-sm max-w-xl"
+              transition={{ duration: 0.35, delay: 0.14 }}
+              className="text-xs sm:text-sm md:text-base text-zinc-200 leading-relaxed font-normal line-clamp-2 max-w-xl drop-shadow-sm"
             >
               {currentSlide.description}
             </motion.p>
 
-            {/* Offer Code 1-Click Voucher Bar */}
+            {/* Action Row & One-Click Interactive Coupon Pill */}
             <motion.div
-              key={`voucher-${currentSlide.id}`}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.22 }}
-              className="p-2.5 sm:p-3 rounded-2xl bg-black/60 backdrop-blur-md border border-white/25 flex items-center justify-between gap-3 max-w-md shadow-xl"
-            >
-              <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4 text-amber-300 shrink-0" />
-                <span className="text-xs text-zinc-100 font-semibold truncate">
-                  Code: <strong className="text-amber-300 font-mono font-black tracking-wide">{currentSlide.offerCode}</strong>
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleCopyCode(currentSlide.offerCode)}
-                className="px-3.5 py-1.5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-100 text-[11px] sm:text-xs font-black shadow-sm active:scale-95 transition shrink-0 flex items-center gap-1.5"
-              >
-                {copiedCode === currentSlide.offerCode ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-green-600 stroke-[3]" /> Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5 text-zinc-900" /> Copy Code
-                  </>
-                )}
-              </button>
-            </motion.div>
-
-            {/* Action Buttons */}
-            <motion.div
-              key={`btn-${currentSlide.id}`}
-              initial={{ opacity: 0, y: 18 }}
+              key={`actions-${currentSlide.id}`}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.28 }}
-              className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-1.5 sm:pt-2.5"
+              transition={{ duration: 0.35, delay: 0.2 }}
+              className="flex flex-wrap items-center gap-3 pt-2 sm:pt-3"
             >
+              {/* High-Impact Primary CTA */}
               <Button
                 size="lg"
                 onClick={() => navigate(currentSlide.buttonLink)}
-                className="rounded-full px-6 sm:px-8 font-black shadow-xl bg-white hover:bg-zinc-100 text-zinc-950 flex items-center gap-2 h-10 sm:h-12 text-xs sm:text-sm transition transform hover:scale-[1.02]"
+                className="group rounded-full px-6 sm:px-8 font-black shadow-2xl bg-white hover:bg-zinc-100 text-zinc-950 flex items-center gap-2.5 h-11 sm:h-12 text-xs sm:text-sm transition-all duration-300 transform hover:scale-[1.03] active:scale-95 cursor-pointer"
               >
-                <ShoppingBag className="w-4 h-4 text-zinc-950" /> {currentSlide.buttonText} <ArrowRight className="w-4 h-4" />
+                <ShoppingBag className="w-4 h-4 text-zinc-950" />
+                <span>{currentSlide.buttonText}</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-200" />
               </Button>
 
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate("/products")}
-                className="rounded-full px-5 sm:px-6 font-bold bg-white/15 hover:bg-white/25 text-white border-white/30 backdrop-blur-md h-10 sm:h-12 text-xs sm:text-sm shadow-md"
+              {/* Interactive One-Click Coupon Pill (Light Shade Aesthetic) */}
+              <button
+                type="button"
+                onClick={() => handleCopyCode(currentSlide.offerCode)}
+                aria-label={`Copy coupon code ${currentSlide.offerCode}`}
+                className="group inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-zinc-950 shadow-xl border border-white/60 transition-all duration-200 active:scale-95 cursor-pointer backdrop-blur-md"
               >
-                Explore Catalog
-              </Button>
+                <div className={`p-1 rounded-full transition-colors ${copiedCode === currentSlide.offerCode ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-800"}`}>
+                  {copiedCode === currentSlide.offerCode ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-950" />
+                  )}
+                </div>
+                <span className="flex items-center gap-1.5 font-mono">
+                  <span className="text-zinc-500 font-semibold text-[11px] sm:text-xs">CODE:</span>
+                  <strong className="text-zinc-950 font-black tracking-wider">
+                    {currentSlide.offerCode}
+                  </strong>
+                </span>
+                <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                <span className={`text-[11px] font-bold tracking-wide uppercase transition-colors ${copiedCode === currentSlide.offerCode ? "text-emerald-700" : "text-zinc-600"}`}>
+                  {copiedCode === currentSlide.offerCode ? "Copied!" : "Tap to Copy"}
+                </span>
+              </button>
             </motion.div>
           </div>
-        </div>
 
-        {/* 🌟 Responsive Carousel Controls (Mobile Segmented Bar + Desktop Luxury Cards) */}
-        <div className="relative z-20 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full mt-6 sm:mt-10">
-          {/* Mobile Controller (< sm) */}
-          <div className="block sm:hidden space-y-3">
-            {/* 5 Progress Bars */}
-            <div className="grid grid-cols-5 gap-2">
+          {/* Bottom Row: Sleek Luxury Glass Slide Indicators */}
+          <div className="relative z-10 w-full pt-4">
+            {/* Desktop Slide Tabs (5 High-End Glass Cards) */}
+            <div className="hidden sm:grid sm:grid-cols-5 gap-3">
               {heroSlides.map((slide, i) => {
                 const isActive = currentHeroIndex === i
 
@@ -440,210 +526,218 @@ export default function Home() {
                     key={slide.id}
                     type="button"
                     onClick={() => setCurrentHeroIndex(i)}
-                    className="py-1.5 focus:outline-none cursor-pointer"
-                    aria-label={`Go to slide ${i + 1}: ${slide.shortTitle}`}
+                    className={`group text-left p-3 rounded-2xl backdrop-blur-xl transition-all duration-300 relative border flex flex-col justify-between overflow-hidden cursor-pointer ${
+                      isActive
+                        ? `bg-black/65 ${slide.accentBorder} ring-1 ring-white/25 shadow-xl scale-[1.02]`
+                        : "bg-black/30 hover:bg-black/50 border-white/10 hover:border-white/25 opacity-75 hover:opacity-100"
+                    }`}
                   >
-                    <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                    {/* Animated Progress Bar */}
+                    <div className="h-1 w-full bg-white/15 rounded-full overflow-hidden mb-2">
                       {isActive ? (
                         <motion.div
-                          key={`bar-mobile-${currentHeroIndex}`}
+                          key={`bar-${currentHeroIndex}-${isHeroHovered}`}
                           initial={{ width: "0%" }}
                           animate={{ width: "100%" }}
-                          transition={{ duration: 5.5, ease: "linear" }}
-                          className="h-full bg-amber-400 rounded-full"
+                          transition={{
+                            duration: isHeroHovered ? 999999 : 5.5,
+                            ease: "linear",
+                          }}
+                          className={`h-full ${slide.accentBg} rounded-full`}
                         />
                       ) : (
-                        <div
-                          className={`h-full ${
-                            i < currentHeroIndex ? "bg-white/40" : "w-0"
-                          }`}
-                        />
+                        <div className="h-full w-0" />
                       )}
                     </div>
+
+                    <div className="flex items-center justify-between w-full">
+                      <span
+                        className={`text-[10px] font-mono font-black ${
+                          isActive ? slide.accentColor : "text-white/50"
+                        }`}
+                      >
+                        0{i + 1}
+                      </span>
+                      <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-white/10 text-white/90">
+                        {slide.discountTag}
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-white truncate mt-1">
+                      {slide.shortTitle}
+                    </p>
                   </button>
                 )
               })}
             </div>
 
-            {/* Active Slide Pill */}
-            <div className="flex items-center justify-between bg-black/60 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-2xl">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-[11px] font-mono font-black text-amber-300 bg-white/10 px-2 py-0.5 rounded-lg border border-white/10 shrink-0">
-                  0{currentHeroIndex + 1} / 0{heroSlides.length}
-                </span>
-                <span className="text-xs font-bold text-white truncate">
-                  {currentSlide.shortTitle}
-                </span>
+            {/* Mobile Controller (< sm) */}
+            <div className="block sm:hidden space-y-2.5">
+              <div className="grid grid-cols-5 gap-1.5">
+                {heroSlides.map((slide, i) => {
+                  const isActive = currentHeroIndex === i
+
+                  return (
+                    <button
+                      key={slide.id}
+                      type="button"
+                      onClick={() => setCurrentHeroIndex(i)}
+                      className="py-3.5 px-0.5 min-h-[44px] flex items-center justify-center focus:outline-none cursor-pointer"
+                      aria-label={`Go to slide ${i + 1}: ${slide.shortTitle}`}
+                    >
+                      <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                        {isActive ? (
+                          <motion.div
+                            key={`bar-mobile-${currentHeroIndex}`}
+                            initial={{ width: "0%" }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 5.5, ease: "linear" }}
+                            className={`h-full ${slide.accentBg} rounded-full`}
+                          />
+                        ) : (
+                          <div
+                            className={`h-full ${
+                              i < currentHeroIndex ? "bg-white/50" : "w-0"
+                            }`}
+                          />
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
 
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-400 text-zinc-950 shadow-xs shrink-0">
-                {currentSlide.discountTag}
-              </span>
+              <div className="flex items-center justify-between bg-black/50 backdrop-blur-xl border border-white/20 px-3.5 py-2 rounded-xl text-xs shadow-lg">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="font-mono text-[11px] font-bold text-white/60">
+                    0{currentHeroIndex + 1}
+                  </span>
+                  <span className="font-extrabold text-white truncate">
+                    {currentSlide.shortTitle}
+                  </span>
+                </div>
+                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${currentSlide.accentBg} text-zinc-950 shrink-0`}>
+                  {currentSlide.discountTag}
+                </span>
+              </div>
             </div>
-          </div>
-
-          {/* Desktop Controller (sm and above) */}
-          <div className="hidden sm:grid sm:grid-cols-5 gap-3">
-            {heroSlides.map((slide, i) => {
-              const isActive = currentHeroIndex === i
-
-              return (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => setCurrentHeroIndex(i)}
-                  className={`text-left p-3 rounded-2xl backdrop-blur-md transition-all duration-300 relative border flex flex-col justify-between overflow-hidden group cursor-pointer ${
-                    isActive
-                      ? "bg-black/85 border-amber-400/90 ring-2 ring-amber-400/40 shadow-2xl scale-[1.01]"
-                      : "bg-black/55 hover:bg-black/75 border-white/20 hover:border-white/40 shadow-md"
-                  }`}
-                >
-                  {/* Progress Fill Line */}
-                  <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden mb-2">
-                    {isActive ? (
-                      <motion.div
-                        key={`bar-${currentHeroIndex}`}
-                        initial={{ width: "0%" }}
-                        animate={{ width: "100%" }}
-                        transition={{ duration: 5.5, ease: "linear" }}
-                        className="h-full bg-amber-400 rounded-full shadow-xs"
-                      />
-                    ) : (
-                      <div className="h-full w-0" />
-                    )}
-                  </div>
-
-                  {/* Header Row: Index Number & Discount Tag */}
-                  <div className="flex items-center justify-between w-full">
-                    <span
-                      className={`text-[11px] font-mono font-black ${
-                        isActive ? "text-amber-300" : "text-white/60"
-                      }`}
-                    >
-                      0{i + 1}
-                    </span>
-
-                    <span
-                      className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded ${
-                        isActive
-                          ? "bg-amber-400 text-zinc-950 font-black shadow-xs"
-                          : "bg-white/15 text-white/90"
-                      }`}
-                    >
-                      {slide.discountTag}
-                    </span>
-                  </div>
-
-                  {/* Title Label */}
-                  <p
-                    className={`text-xs font-black tracking-tight truncate pt-1 transition-colors ${
-                      isActive ? "text-white" : "text-white/80 group-hover:text-white"
-                    }`}
-                  >
-                    {slide.shortTitle}
-                  </p>
-                </button>
-              )
-            })}
           </div>
         </div>
       </section>
 
       {/* ========================================================================= */}
-      {/* ⏱️ 2. LIVE FLASH DEALS TICKING COUNTDOWN BANNER */}
+      {/* 🚀 2. VALUE PROPOSITIONS STRIP */}
       {/* ========================================================================= */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl p-5 sm:p-8 bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6">
-          <div className="space-y-1.5 text-center md:text-left">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/20 text-white text-[11px] sm:text-xs font-black uppercase tracking-wider backdrop-blur-xs">
-              <Flame className="w-3.5 h-3.5 text-amber-300" /> Lightning Flash Sale
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 p-3 sm:p-5 rounded-2xl sm:rounded-3xl bg-card border border-border/70 shadow-xs">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 p-1.5 sm:p-2">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+              <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <h3 className="text-xl sm:text-3xl font-black tracking-tight">
+            <div>
+              <p className="font-extrabold text-xs sm:text-sm text-foreground leading-snug">Express Delivery</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Fast dispatch with live AWB tracking</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 sm:gap-3.5 p-1.5 sm:p-2">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-green-500/10 text-green-600 shrink-0">
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div>
+              <p className="font-extrabold text-xs sm:text-sm text-foreground leading-snug">100% Genuine</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Authentic, verified quality apparel</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 sm:gap-3.5 p-1.5 sm:p-2">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-blue-500/10 text-blue-600 shrink-0">
+              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div>
+              <p className="font-extrabold text-xs sm:text-sm text-foreground leading-snug">7-Day Returns</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Hassle-free exchange policy</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 sm:gap-3.5 p-1.5 sm:p-2">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-purple-500/10 text-purple-600 shrink-0">
+              <Headphones className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div>
+              <p className="font-extrabold text-xs sm:text-sm text-foreground leading-snug">24/7 AI Support</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Instant smart order lookup</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* ⏱️ 3. LIVE FLASH DEALS TICKING COUNTDOWN BANNER (SUBTLE LUXURY EDITION) */}
+      {/* ========================================================================= */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-7 bg-card/80 dark:bg-zinc-900/70 border border-border/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 backdrop-blur-md">
+          {/* Subtle soft ambient aura */}
+          <div className="absolute top-0 right-1/4 w-72 h-72 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+
+          <div className="space-y-1.5 text-center md:text-left relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] sm:text-xs font-bold uppercase tracking-wider">
+              <Flame className="w-3.5 h-3.5 text-primary" /> Limited Time Flash Offer
+            </div>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-foreground">
               Extra 10% Off Instant Sitewide
-            </h3>
-            <p className="text-xs sm:text-sm text-white/90">
-              Apply code <strong className="font-mono underline font-black">SHOPSHERE10</strong> at checkout.
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground flex items-center justify-center md:justify-start gap-1.5 flex-wrap">
+              <span>Use voucher code</span>
+              <button
+                type="button"
+                onClick={() => handleCopyCode("SHOPSHERE10")}
+                aria-label="Copy SHOPSHERE10 coupon code"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-mono font-bold text-xs border border-border transition active:scale-95 cursor-pointer"
+              >
+                <span>SHOPSHERE10</span>
+                {copiedCode === "SHOPSHERE10" ? (
+                  <Check className="w-3 h-3 text-emerald-600" />
+                ) : (
+                  <Copy className="w-3 h-3 text-muted-foreground" />
+                )}
+              </button>
+              <span>at checkout before time expires.</span>
             </p>
           </div>
 
-          {/* Countdown Clock Display */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex flex-col items-center justify-center w-13 sm:w-16 h-13 sm:h-16 rounded-2xl bg-black/30 backdrop-blur-md border border-white/20">
-              <span className="text-base sm:text-xl font-black font-mono leading-none">
+          {/* Minimalist Monochrome Countdown Timer Display */}
+          <div className="flex items-center gap-2 sm:gap-3 relative z-10">
+            <div className="flex flex-col items-center justify-center w-12 sm:w-14 h-12 sm:h-14 rounded-2xl bg-muted/60 dark:bg-zinc-800/80 border border-border/70 shadow-2xs">
+              <span className="text-sm sm:text-lg font-black font-mono leading-none text-foreground">
                 {String(timeLeft.hours).padStart(2, "0")}
               </span>
-              <span className="text-[9px] uppercase font-bold text-white/70 mt-0.5">Hours</span>
+              <span className="text-[8px] uppercase font-bold text-muted-foreground mt-0.5 tracking-wider">Hours</span>
             </div>
-            <span className="text-xl font-black font-mono">:</span>
-            <div className="flex flex-col items-center justify-center w-13 sm:w-16 h-13 sm:h-16 rounded-2xl bg-black/30 backdrop-blur-md border border-white/20">
-              <span className="text-base sm:text-xl font-black font-mono leading-none">
+            <span className="text-base sm:text-lg font-black font-mono text-muted-foreground/60">:</span>
+            <div className="flex flex-col items-center justify-center w-12 sm:w-14 h-12 sm:h-14 rounded-2xl bg-muted/60 dark:bg-zinc-800/80 border border-border/70 shadow-2xs">
+              <span className="text-sm sm:text-lg font-black font-mono leading-none text-foreground">
                 {String(timeLeft.minutes).padStart(2, "0")}
               </span>
-              <span className="text-[9px] uppercase font-bold text-white/70 mt-0.5">Mins</span>
+              <span className="text-[8px] uppercase font-bold text-muted-foreground mt-0.5 tracking-wider">Mins</span>
             </div>
-            <span className="text-xl font-black font-mono">:</span>
-            <div className="flex flex-col items-center justify-center w-13 sm:w-16 h-13 sm:h-16 rounded-2xl bg-black/30 backdrop-blur-md border border-white/20">
-              <span className="text-base sm:text-xl font-black font-mono leading-none text-amber-300">
+            <span className="text-base sm:text-lg font-black font-mono text-muted-foreground/60">:</span>
+            <div className="flex flex-col items-center justify-center w-12 sm:w-14 h-12 sm:h-14 rounded-2xl bg-muted/60 dark:bg-zinc-800/80 border border-border/70 shadow-2xs">
+              <span className="text-sm sm:text-lg font-black font-mono leading-none text-primary">
                 {String(timeLeft.seconds).padStart(2, "0")}
               </span>
-              <span className="text-[9px] uppercase font-bold text-white/70 mt-0.5">Secs</span>
+              <span className="text-[8px] uppercase font-bold text-muted-foreground mt-0.5 tracking-wider">Secs</span>
             </div>
           </div>
 
-          <Button
-            size="lg"
-            variant="secondary"
-            onClick={() => navigate("/products")}
-            className="rounded-full px-6 sm:px-8 font-black shadow-lg text-xs sm:text-sm h-10 sm:h-11 w-full md:w-auto"
-          >
-            Claim Flash Deal <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 🚀 3. VALUE PROPOSITIONS STRIP */}
-      {/* ========================================================================= */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 p-3.5 sm:p-6 rounded-3xl bg-card border border-border/80 shadow-2xs">
-          <div className="flex items-center gap-2.5 sm:gap-4 p-2">
-            <div className="p-2 sm:p-3 rounded-2xl bg-primary/10 text-primary shrink-0">
-              <Truck className="w-4 h-4 sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-xs sm:text-sm text-foreground">Express Delivery</h4>
-              <p className="text-[9px] sm:text-xs text-muted-foreground">Fast shipping with live AWB tracking</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 sm:gap-4 p-2">
-            <div className="p-2 sm:p-3 rounded-2xl bg-green-500/10 text-green-600 shrink-0">
-              <ShieldCheck className="w-4 h-4 sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-xs sm:text-sm text-foreground">100% Genuine</h4>
-              <p className="text-[9px] sm:text-xs text-muted-foreground">Authentic, verified quality items</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 sm:gap-4 p-2">
-            <div className="p-2 sm:p-3 rounded-2xl bg-blue-500/10 text-blue-600 shrink-0">
-              <RotateCcw className="w-4 h-4 sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-xs sm:text-sm text-foreground">7-Day Returns</h4>
-              <p className="text-[9px] sm:text-xs text-muted-foreground">Hassle-free replacement policy</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 sm:gap-4 p-2">
-            <div className="p-2 sm:p-3 rounded-2xl bg-purple-500/10 text-purple-600 shrink-0">
-              <Headphones className="w-4 h-4 sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-xs sm:text-sm text-foreground">24/7 AI Support</h4>
-              <p className="text-[9px] sm:text-xs text-muted-foreground">Instant smart chat & order lookup</p>
-            </div>
+          <div className="relative z-10 w-full md:w-auto">
+            <Button
+              size="lg"
+              onClick={() => navigate("/products")}
+              className="rounded-full px-6 sm:px-8 font-black shadow-xs text-xs sm:text-sm h-11 w-full md:w-auto bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 active:scale-95 cursor-pointer"
+            >
+              <span>Explore Deals</span>
+              <ArrowRight className="w-4 h-4 ml-1.5" />
+            </Button>
           </div>
         </div>
       </section>
@@ -684,6 +778,10 @@ export default function Home() {
               <img
                 src={cat.image}
                 alt={cat.name}
+                width="240"
+                height="288"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
@@ -718,38 +816,65 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 pt-1">
           {promoVouchers.map((voucher) => {
             const isCopied = copiedCode === voucher.code
 
             return (
               <div
                 key={voucher.code}
-                className={`relative overflow-hidden rounded-3xl p-4 sm:p-5 bg-gradient-to-br ${voucher.theme} text-white shadow-lg flex flex-col justify-between space-y-3.5 transition hover:scale-[1.02]`}
+                className={`group relative overflow-hidden rounded-3xl p-4 sm:p-5 ${voucher.bgClass} ${voucher.borderClass} border shadow-xs hover:shadow-md flex flex-col justify-between space-y-3.5 transition-all duration-300 hover:-translate-y-0.5`}
               >
-                <div className="space-y-1">
-                  <div className="flex justify-between items-start">
-                    <span className="text-lg sm:text-2xl font-black tracking-tight">{voucher.discount}</span>
-                    <span className="text-[9px] sm:text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-xs">
+                {/* Subtle light ambient glow */}
+                <div
+                  className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl pointer-events-none transition-opacity ${voucher.glowClass}`}
+                />
+
+                <div className="relative z-10 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${voucher.badgeClass}`}>
+                      {voucher.badge}
+                    </span>
+                    <span className="text-[10px] font-mono font-semibold text-muted-foreground">
                       {voucher.expiry}
                     </span>
                   </div>
-                  <h4 className="font-bold text-xs sm:text-sm text-white/90 line-clamp-1">{voucher.title}</h4>
-                  <p className="text-[10px] sm:text-[11px] text-white/75">{voucher.minSpend}</p>
+
+                  <div className="pt-0.5">
+                    <span className="text-xl sm:text-2xl font-black tracking-tight text-foreground block">
+                      {voucher.discount}
+                    </span>
+                    <h3 className="font-bold text-xs sm:text-sm text-foreground/90 mt-0.5 line-clamp-1">
+                      {voucher.title}
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground font-medium mt-0.5">
+                      {voucher.minSpend}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex justify-between items-center bg-black/25 backdrop-blur-md rounded-2xl p-2 sm:p-2.5 border border-white/20">
-                  <span className="font-mono font-black text-xs sm:text-sm tracking-wider text-amber-300">
+                {/* Perforated coupon divider */}
+                <div className="relative z-10 -mx-5 px-5 border-t border-dashed border-border/80" />
+
+                {/* Clean Light Code Pill & Copy Action */}
+                <div className="relative z-10 flex justify-between items-center bg-card/90 dark:bg-zinc-900/90 border border-border/70 rounded-2xl p-2 sm:p-2.5 shadow-2xs">
+                  <span className={`font-mono font-black text-xs sm:text-sm tracking-wider pl-1 ${voucher.accentClass}`}>
                     {voucher.code}
                   </span>
 
                   <button
+                    type="button"
                     onClick={() => handleCopyCode(voucher.code)}
-                    className="flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-xl bg-white text-black text-[10px] sm:text-[11px] font-extrabold shadow-sm hover:bg-white/90 active:scale-95 transition"
+                    aria-label={`Copy coupon code ${voucher.code}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 active:scale-95 cursor-pointer shadow-xs ${
+                      isCopied
+                        ? "bg-emerald-500 text-white"
+                        : "bg-foreground text-background hover:bg-foreground/90"
+                    }`}
                   >
                     {isCopied ? (
                       <>
-                        <Check className="w-3 h-3 text-green-600" /> Copied!
+                        <Check className="w-3.5 h-3.5" /> Copied!
                       </>
                     ) : (
                       <>
@@ -788,9 +913,7 @@ export default function Home() {
 
         {/* Horizontal Smooth Snap Swipe Track (No clunky arrows!) */}
         {loading ? (
-          <div className="flex justify-center items-center py-16">
-            <Loader />
-          </div>
+          <ProductHorizontalTrackSkeleton count={5} />
         ) : error ? (
           <div className="text-center py-10 text-red-500">
             <p>Error loading featured catalog: {error}</p>
@@ -830,9 +953,9 @@ export default function Home() {
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary-foreground text-xs font-black uppercase tracking-wider border border-primary/30">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" /> VIP Member Access
             </div>
-            <h3 className="text-xl sm:text-4xl font-black tracking-tight text-white">
+            <h2 className="text-xl sm:text-4xl font-black tracking-tight text-white">
               Unlock ₹200 Off Your First Order
-            </h3>
+            </h2>
             <p className="text-xs sm:text-sm text-white/70 leading-relaxed">
               Join the ShopSphere Insiders Club to receive secret promo drops, limited release alerts, and member-exclusive discount codes.
             </p>
@@ -849,6 +972,7 @@ export default function Home() {
                   <input
                     type="email"
                     required
+                    aria-label="Email address for VIP membership discounts"
                     placeholder="Enter your email address..."
                     value={newsletterEmail}
                     onChange={(e) => setNewsletterEmail(e.target.value)}
@@ -858,6 +982,7 @@ export default function Home() {
                 <Button
                   type="submit"
                   size="lg"
+                  aria-label="Unlock voucher code"
                   className="rounded-2xl font-black text-xs sm:text-sm h-10 sm:h-11 px-5 sm:px-6 shadow-lg bg-primary hover:bg-primary/90 flex items-center justify-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5" /> Unlock Voucher
@@ -901,7 +1026,7 @@ export default function Home() {
 
               <div className="flex justify-between items-center border-t pt-3 text-xs">
                 <div>
-                  <h5 className="font-extrabold text-foreground">{review.name}</h5>
+                  <h3 className="font-extrabold text-foreground">{review.name}</h3>
                   <span className="text-[10px] sm:text-[11px] text-muted-foreground">{review.location}</span>
                 </div>
 
