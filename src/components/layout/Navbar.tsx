@@ -159,10 +159,10 @@ export default function Navbar() {
               size="icon"
               aria-label="Search catalog"
               onClick={() => setSearchOpen(true)}
-              className="sm:hidden rounded-full hover:bg-muted w-8 h-8 text-foreground"
+              className="sm:hidden rounded-full hover:bg-muted w-9 h-9 text-foreground active:scale-90 transition-transform"
               title="Search products (Cmd+K)"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4.5 h-4.5" />
             </Button>
 
             {user?.role !== "delivery" && (
@@ -433,6 +433,22 @@ export default function Navbar() {
                     </>
                   ) : (
                     <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuOpen(false)
+                          setSearchOpen(true)
+                        }}
+                        className="w-full px-3 py-2.5 rounded-xl bg-muted/50 hover:bg-muted font-medium text-sm flex items-center justify-between text-foreground cursor-pointer transition border border-border/50 active:scale-98"
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <Search className="w-4 h-4 text-primary" /> Search Products
+                        </span>
+                        <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-background border border-border/70 text-muted-foreground font-bold">
+                          ⌘K
+                        </kbd>
+                      </button>
+
                       <Link
                         to="/"
                         onClick={() => setMenuOpen(false)}
@@ -551,7 +567,10 @@ export default function Navbar() {
       />
 
       {/* 📱 Mobile Bottom Navigation Bar (sm:hidden) */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 py-2 px-3 flex justify-around items-center shadow-lg">
+      <nav
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 pt-2 px-2 flex justify-around items-center shadow-lg"
+        style={{ paddingBottom: "max(0.625rem, env(safe-area-inset-bottom, 10px))" }}
+      >
         {user?.role === "delivery" ? (
           <>
             <Link
